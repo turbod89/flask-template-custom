@@ -11,7 +11,7 @@ class DB():
     def getSession(config = {}):
         if DB.session is None:
             Session = sessionmaker()
-            engine = sqlalchemy.create_engine(config['DATABASE_URI'], echo=False)
+            engine = sqlalchemy.create_engine(config['DATABASE_URI'], echo=True)
             Session.configure(bind=engine)
 
             session = Session()

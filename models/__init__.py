@@ -29,11 +29,11 @@ def init_app (app):
     def init_db():
         print ('\nInit Db\n')
         db = get_db()
-        Base.metadata.create_all(db.engine)
+        Base.metadata.create_all(db.bind)
 
 
     @app.cli.command('init-db')
-    #@with_appcontext
+    @with_appcontext
     def init_db_command():
         """Clear the existing data and create new tables."""
         init_db()
