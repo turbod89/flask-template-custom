@@ -30,6 +30,7 @@ def init_app (app):
         print ('\nInit Db\n')
         db = get_db()
         Base.metadata.create_all(db.bind)
+        db.commit()
 
 
     @app.cli.command('init-db')
