@@ -15,9 +15,9 @@ class Configuration():
         if config == 'dev':
             host = 'localhost'
             port = '3306'
-            user = 'username'
-            password = 'mypassword'
-            database = 'mydatabase'
+            user = 'dtorres'
+            password = 'sqlpass'
+            database = 'webInn'
         elif config == 'test':
             host = 'localhost'
             port = '3306'
