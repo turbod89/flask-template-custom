@@ -8,6 +8,7 @@ from .Base import Base
 from .User import User
 
 def init_app (app):
+    print('models/__init__.py init_app(app)')
 
     def get_db(config = None):
 
@@ -42,6 +43,8 @@ def init_app (app):
     app.cli.add_command(init_db_command)
  
     app.teardown_appcontext(close_db)
+
+    app.get_db = get_db
 
 
     return app
