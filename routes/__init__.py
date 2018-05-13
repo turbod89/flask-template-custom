@@ -7,7 +7,7 @@ def init_app(app):
     @app.route('/')
     def index():
         print (g)
-        session = app.get_db()
+        session = app.get_db_session()
         users = session.query(models.User).all()
         return jsonify(users)
         

@@ -10,28 +10,28 @@ from .User import User
 def init_app (app):
     print('models/__init__.py init_app(app)')
 
-    def get_db(config = None):
+    def get_db_session(config = None):
 
         if config is None:
             config = app.config
         
-        if 'db' not in g:
-            g.db = DB.getSession(config)
+        if 'session' not in g:
+            g.db_session = DB.getSession(config)
 
-        return g.db
+        return g.db_session
 
 
-    def close_db(e=None):
-        db = g.pop('db', None)
+    def close_db_session(e=None):
+        session = g.pop('db_session', None)
 
-        if db is not None:
-            db.close()
+        if session is not None:
+            session.close()
 
     def init_db():
-        print ('\nInit Db\n')
-        db = get_db()
-        Base.metadata.create_all(db.bind)
-        db.commit()
+        print ('\nInit session\n')
+        session = get_db_session()
+        Base.metadata.create_all(session.bind)
+        session.commit()
 
 
     @app.cli.command('init-db')
@@ -42,9 +42,9 @@ def init_app (app):
         click.echo('Initialized the database.')
     app.cli.add_command(init_db_command)
  
-    app.teardown_appcontext(close_db)
+    app.teardown_appcontext(close_db_session)
 
-    app.get_db = get_db
+    app.get_db_session = get_db_session
 
 
     return app
