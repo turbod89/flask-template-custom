@@ -41,6 +41,7 @@ class Configuration():
 
         self.DATABASE_URI = 'mysql+mysqlconnector://%s:%s@%s:%s/%s' % (user, password, host, str(port), database)
         self.SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://%s:%s@%s:%s/%s' % (user, password, host, str(port), database)
+        self.SQLALCHEMY_TRACK_MODIFICATIONS = False
         self.SECRET_KEY = 'mysecretkey'
         
         self.SESSION_REFRESH_EACH_REQUEST = True
