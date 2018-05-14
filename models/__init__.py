@@ -2,9 +2,7 @@ import click
 from flask import current_app, g
 from flask.cli import with_appcontext
 
-from flask_sqlalchemy import SQLAlchemy
-
-from .DB import DB
+from .db import db
 
 from .Base import Base
 from .User import User
@@ -12,13 +10,15 @@ from .User import User
 def init_app (app):
     print('models/__init__.py init_app(app)')
 
+    db.init_app(app)
+
     def get_db_session(config = None):
 
         if config is None:
             config = app.config
         
         if 'session' not in g:
-            g.db_session = DB.getSession(config)
+            g.db_session = db
 
         return g.db_session
 
@@ -31,9 +31,8 @@ def init_app (app):
 
     def init_db():
         print ('\nInit session\n')
-        session = get_db_session()
-        Base.metadata.create_all(session.bind)
-        session.commit()
+        db.create_all()
+        db.session.commit()
 
 
     @app.cli.command('init-db')
@@ -41,12 +40,11 @@ def init_app (app):
     def init_db_command():
         """Clear the existing data and create new tables."""
         init_db()
-        click.echo('Initialized the database.')
     app.cli.add_command(init_db_command)
  
     app.teardown_appcontext(close_db_session)
 
-    app.get_db_session = get_db_session
+    app.get_db = get_db_session
 
 
     return app

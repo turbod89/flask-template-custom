@@ -1,26 +1,26 @@
-from .Base import Base
-from sqlalchemy import Column, Integer, String, DateTime, Date, TIMESTAMP, ForeignKey,Boolean
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql.expression import func
+from .Base import Base, db
+from sqlalchemy.sql import func
 
 class User(Base):
     __tablename__ = 'users'
 
-    id_gender = Column('id_gender', Integer, nullable = False)
-    id_default_group = Column('id_default_group', Integer, nullable = False)
-    firstname = Column('firstname', String(32), nullable = False)
-    lastname = Column('lastname', String(32), nullable = False)
-    email = Column('email', String(128), nullable = False)
-    password = Column('passwd', String(32), nullable = False)
-    last_passwd_gen = Column('last_passwd_gen', TIMESTAMP, nullable = False, default = func.now())
-    birthday = Column('birthday', DateTime, nullable = True)
-    secure_key = Column('secure_key', String(32), nullable = False)
-    ekey_md5 = Column('ekey_md5', String(32), nullable = False)
-    note = Column('note', String(128), nullable = True)
-    active = Column('active', String(32), nullable = False)
-    is_guest = Column('is_guest', Boolean, nullable = False, default = False)
-    is_admin = Column('is_admin', Boolean, nullable = False, default = False)
-    id_source = Column('id_source', Integer, nullable = False)
+
+    #id = db.Column('id_user', db.Integer, nullable = False, primary_key = True, autoincrement = True)
+    id_gender = db.Column('id_gender', db.Integer, nullable = False)
+    id_default_group = db.Column('id_default_group', db.Integer, nullable = False)
+    firstname = db.Column('firstname', db.String(32), nullable = True)
+    lastname = db.Column('lastname', db.String(32), nullable = True)
+    email = db.Column('email', db.String(128), nullable = False, unique = True)
+    password = db.Column('passwd', db.String(32), nullable = False)
+    last_passwd_gen = db.Column('last_passwd_gen', db.DateTime, nullable = False, default = func.now())
+    birthday = db.Column('birthday', db.DateTime, nullable = True)
+    secure_key = db.Column('secure_key', db.String(32), nullable = False)
+    ekey_md5 = db.Column('ekey_md5', db.String(32), nullable = False)
+    note = db.Column('note', db.String(128), nullable = True)
+    active = db.Column('active', db.String(32), nullable = False)
+    is_guest = db.Column('is_guest', db.Boolean, nullable = False, default = False)
+    is_admin = db.Column('is_admin', db.Boolean, nullable = False, default = False)
+    id_source = db.Column('id_source', db.Integer, nullable = False)
     
 
     def __repr__(self):
