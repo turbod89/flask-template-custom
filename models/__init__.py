@@ -6,11 +6,14 @@ from .db import db
 
 from .Base import Base
 from .User import User
+from .Group import Group
+from .relationships import generateRelationships
 
 def init_app (app):
     print('models/__init__.py init_app(app)')
 
     db.init_app(app)
+    generateRelationships(db)
 
     def get_db_session(config = None):
 
