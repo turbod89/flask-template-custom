@@ -29,7 +29,7 @@ def init_app (app):
         if session is not None:
             session.close()
 
-    def init_db():
+    def reset_db():
         print ('Destroying database...')
         db.drop_all()
         print('Commiting...')
@@ -42,16 +42,14 @@ def init_app (app):
         auth.generate(db)
 
 
-    @app.cli.command('init-db')
+    @app.cli.command('reset-db')
     @with_appcontext
-    def init_db_command():
+    def reset_db_command():
         """Clear the existing data and create new tables."""
-        init_db()
-    app.cli.add_command(init_db_command)
+        reset_db()
+    app.cli.add_command(reset_db_command)
  
     app.teardown_appcontext(close_db_session)
-
-    app.get_db = get_db_session
 
 
     return app
