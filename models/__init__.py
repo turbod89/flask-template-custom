@@ -3,17 +3,14 @@ from flask import current_app, g
 from flask.cli import with_appcontext
 
 from .db import db
-
-from .Base import Base
-from .User import User
-from .Group import Group
-from .relationships import generateRelationships
+from . import auth
 
 def init_app (app):
     print('models/__init__.py init_app(app)')
 
     db.init_app(app)
-    generateRelationships(db)
+    auth.init_app(app,db)
+
 
     def get_db_session(config = None):
 
@@ -36,6 +33,7 @@ def init_app (app):
         print ('\nInit session\n')
         db.create_all()
         db.session.commit()
+        auth.generate(db)
 
 
     @app.cli.command('init-db')
