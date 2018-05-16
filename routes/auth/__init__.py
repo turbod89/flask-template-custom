@@ -18,6 +18,9 @@ def load_logged_in_user():
     else:
         g.user = models.auth.User.query.filter_by(id = user_id).first()
 
+'''
+    Register
+'''
 
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
@@ -46,6 +49,10 @@ def register():
     return render_template('auth/register.html')
 
 
+'''
+    Login
+'''
+
 
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
@@ -58,17 +65,22 @@ def login():
 
         if user is None:
             error = 'Incorrect email.'
-        elif not check_password_hash(user['password'], password):
+        elif not check_password_hash(user.password, password):
             error = 'Incorrect password.'
 
         if error is None:
             session.clear()
-            session['user_id'] = user['id']
+            session['user_id'] = user.id
             return redirect(url_for('index'))
 
         flash(error)
 
     return render_template('auth/login.html')
+
+
+'''
+    Logout
+'''
 
 @bp.route('/logout')
 def logout():
