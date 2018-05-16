@@ -1,15 +1,39 @@
-{% extends 'layout.html' %}
+{% extends "layout.html" %}
+{% block body %}
+<form class="form-signup" style="max-width: 420px; margin: auto;padding: 16px;" method="POST">
+  
+    <div class="text-center mb-4">
+        <h1 class="h3 mb-3 font-weight-normal">APP_NAME</h1>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    </div>
+    
+    <div class="form-label-group">
+      <label for="inputFirstname">First Name</label>
+      <input name="firstname" id="inputFirstname" class="form-control" placeholder="First name" required="" autofocus="true" type="text">
+    </div>
+    
+    <div class="form-label-group">
+      <label for="inputLastname">Last Name</label>
+      <input name="lastname" id="inputLastname" class="form-control" placeholder="Last name" required="" type="text">
+    </div>
+      
 
-{% block header %}
-  <h1>{% block title %}Register{% endblock %}</h1>
-{% endblock %}
+    <div class="form-label-group">
+      <label for="inputEmail">Email address</label>
+      <input name="email" id="inputEmail" class="form-control" placeholder="Email address" required="" type="email">
+    </div>
 
-{% block content %}
-  <form method="post">
-    <label for="email">Email</label>
-    <input type="email" name="email" id="email" required>
-    <label for="password">Password</label>
-    <input type="password" name="password" id="password" required>
-    <input type="submit" value="Register">
-  </form>
+    <div class="form-label-group">
+        <label for="inputPassword">Password</label>
+        <input name="password" id="inputPassword" class="form-control" placeholder="Password" required="" type="password">
+    </div>
+    
+    <div class="form-label-group">
+      <label for="inputRepeatPassword">Repeat Password</label>
+      <input name="repeatPassword" id="inputRepeatPassword" class="form-control" placeholder="Repeat Password" required="" type="password">
+    </div>
+
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign up</button>
+    <p class="mt-5 mb-3 text-muted text-center">© 2017-2018</p>
+</form>   
 {% endblock %}
