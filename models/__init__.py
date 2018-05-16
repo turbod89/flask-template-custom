@@ -30,9 +30,15 @@ def init_app (app):
             session.close()
 
     def init_db():
-        print ('\nInit session\n')
-        db.create_all()
+        print ('Destroying database...')
+        db.drop_all()
+        print('Commiting...')
         db.session.commit()
+        print('Creating all again...')
+        db.create_all()
+        print('Comminting...')
+        db.session.commit()
+        print('Generating auth module...')
         auth.generate(db)
 
 

@@ -8,6 +8,17 @@ from .. import models
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 
+
+@bp.before_app_request
+def load_logged_in_user():
+    user_id = session.get('user_id')
+
+    if user_id is None:
+        g.user = None
+    else:
+        g.user = models.auth.User.query.filter_by(id = user_id).first()
+
+
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
     if request.method == 'POST':
@@ -20,12 +31,12 @@ def register():
         elif not password:
             error = 'Password is required.'
         else:
-            user = models.User.query.filter_by(email = email).first()
+            user = models.auth.User.query.filter_by(email = email).first()
             if user is not None:
                 error = 'User {} is already registered.'.format(email)
 
         if error is None:
-            user = models.User(email=email, password = generate_password_hash(password))
+            user = models.auth.User(email=email, password = generate_password_hash(password))
             models.db.session.add(user)
             models.db.session.commit()
             return redirect(url_for('auth.login'))
@@ -39,16 +50,14 @@ def register():
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
     if request.method == 'POST':
-        username = request.form['username']
+        email = request.form['email']
         password = request.form['password']
-        db = models.db
         error = None
-        user = db.execute(
-            'SELECT * FROM users WHERE username = ?', (username,)
-        ).fetchone()
+        user = models.auth.User.query.filter_by(email = email).first()
+            
 
         if user is None:
-            error = 'Incorrect username.'
+            error = 'Incorrect email.'
         elif not check_password_hash(user['password'], password):
             error = 'Incorrect password.'
 
@@ -60,19 +69,6 @@ def login():
         flash(error)
 
     return render_template('auth/login.html')
-
-
-@bp.before_app_request
-def load_logged_in_user():
-    user_id = session.get('user_id')
-
-    if user_id is None:
-        g.user = None
-    else:
-        g.user = models.db.execute(
-            'SELECT * FROM users WHERE id = ?', (user_id,)
-        ).fetchone()
-
 
 @bp.route('/logout')
 def logout():

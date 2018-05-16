@@ -2,7 +2,6 @@ from ..Base import Base
 
 from .User import User
 from .Group import Group
-from .relationships import generateRelationships
 
 
 from werkzeug.security import check_password_hash, generate_password_hash
