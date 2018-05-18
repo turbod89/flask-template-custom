@@ -7,6 +7,8 @@ from .. import models
 
 from . import register,login,logout
 
+from libgravatar import Gravatar
+
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 def load_logged_in_user():
@@ -16,6 +18,7 @@ def load_logged_in_user():
         g.me = None
     else:
         g.me = models.auth.User.query.filter_by(id = user_id).first()
+        g.gravatar = Gravatar(g.me.email)
 
 def login_required(view):
     @functools.wraps(view)
