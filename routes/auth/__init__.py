@@ -9,7 +9,6 @@ from . import register,login,logout
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-@bp.before_app_request
 def load_logged_in_user():
     user_id = session.get('user_id')
 
@@ -17,8 +16,6 @@ def load_logged_in_user():
         g.me = None
     else:
         g.me = models.auth.User.query.filter_by(id = user_id).first()
-
-
 
 def login_required(view):
     @functools.wraps(view)
