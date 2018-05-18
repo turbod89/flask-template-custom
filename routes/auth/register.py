@@ -9,6 +9,8 @@ def append(bp):
         if request.method == 'POST':
             email = request.form['email']
             password = request.form['password']
+            firstname = request.form['firstname'] or ''
+            lastname = request.form['lastname'] or ''
             error = None
 
             if not email:
@@ -21,7 +23,7 @@ def append(bp):
                     error = 'User {} is already registered.'.format(email)
 
             if error is None:
-                user = models.auth.User(email=email, password = generate_password_hash(password))
+                user = models.auth.User(email=email, password = generate_password_hash(password), firstname = firstname, lastname=lastname)
                 models.db.session.add(user)
                 models.db.session.commit()
                 return redirect(url_for('auth.login'))
