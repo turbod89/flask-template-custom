@@ -23,7 +23,7 @@ def append(bp):
                 session.clear()
                 session['user_id'] = user.id
                 session['logged_in'] = True
-                return redirect(url_for('home'))
+                return redirect(url_for('index'))
 
             flash(error)
 
