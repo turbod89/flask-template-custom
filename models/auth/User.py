@@ -1,4 +1,5 @@
 from ..Base import Base, db
+from .Group import Group
 from sqlalchemy.sql import func
 
 relUsersGroups = db.Table('relUsersGroups',

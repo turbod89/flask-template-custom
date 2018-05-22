@@ -24,9 +24,15 @@ def append(bp):
 
             if error is None:
                 user = models.auth.User(email=email, password = generate_password_hash(password), firstname = firstname, lastname=lastname)
+                group = models.auth.Group.query.filter_by(name='active').first()
+                user.groups.append(group)
                 models.db.session.add(user)
                 models.db.session.commit()
-                return redirect(url_for('auth.login'))
+
+                session.clear()
+                session['user_id'] = user.id
+                session['logged_in'] = True
+                return redirect(url_for('index'))
 
             flash(error)
 
