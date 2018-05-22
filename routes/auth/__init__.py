@@ -10,6 +10,7 @@ from . import register,login,logout
 from libgravatar import Gravatar
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
+bp_api = Blueprint('api/auth', __name__, url_prefix='/api/auth')
 
 def load_logged_in_user():
     user_id = session.get('user_id')
@@ -32,5 +33,5 @@ def login_required(view):
 
 
 register.append(bp)
-login.append(bp)
+login.append(bp,bp_api)
 logout.append(bp)
