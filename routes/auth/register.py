@@ -6,11 +6,18 @@ from ... import models
 def append(bp,bp_api):
 
     def logic():
-        email = request.form['email']
-        password = request.form['password']
-        firstname = request.form['firstname'] or ''
-        lastname = request.form['lastname'] or ''
+        email = request.form['email'] if 'email' in request.form else None
+        password = request.form['password'] if 'password' in request.form else None
+        firstname = request.form['firstname'] if 'firstname' in request.form else None
+        lastname = request.form['lastname'] if 'lastname' in request.form else None
         error = None
+
+        if request.is_json:
+            data = request.get_json()
+            email = data['email'] or email
+            password = data['password'] or password
+            firstname = data['firstname'] or firstname
+            lastname = data['lastname'] or lastname
 
         if not email:
             error = 'Email is required.'

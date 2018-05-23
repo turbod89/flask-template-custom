@@ -12,12 +12,14 @@ def append(bp,bp_api):
             return abort(404)
         elif not g.me.belongsTo('admin'):
             return abort(404)
-        
-        userId = request.form['userId'] or None
+
+        userId = request.form['userId'] if 'userId' in request.form else None
         groupNames = request.form['groups'] if 'groups' in request.form else []
-        print(request.get_data())
-        print ([x for x in request.form])
-        print(groupNames)
+        
+        if request.is_json:
+            data = request.get_json()
+            userId = data['userId'] or userId
+            groupNames = data['groups'] or groupNames
         
         if userId is None:
             return jsonify({'errors': [{
@@ -35,7 +37,9 @@ def append(bp,bp_api):
         
         groups = models.db.session.query(models.auth.Group).filter(models.auth.Group.name.in_(groupNames)).all()
 
-        print(groups)
+        user.groups = groups
+
+        models.db.session.commit()
         
 
         return jsonify({'errors': []})
