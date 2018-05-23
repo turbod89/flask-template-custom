@@ -37,7 +37,11 @@ def append(bp,bp_api):
     def login():
         if request.method == 'POST':
             error = parse()
+            if error is None:
+                return redirect(url_for('index'))
+                
             flash(error)
+            
 
         return render_template('auth/login.html')
 

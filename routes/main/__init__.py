@@ -7,4 +7,7 @@ from . import index
 
 bp = Blueprint('main', __name__, url_prefix='/')
 
+def page_not_found(e):
+  return render_template('main/404.html'), 404
+
 index.append(bp)

@@ -12,7 +12,8 @@
     <body>
         {% block navbar -%}
         {{ navbar() }}
-        {%- endblock %} 
+        {%- endblock %}
+
         <main role="main" class="container-fluid" style="margin-top: 64px;">
             <div class ="row">
                 <div class="col-md-12">
@@ -21,12 +22,14 @@
                     {% endfor %}
                 </div>
             </div>
+
             <div class ="row">
                 <div class ="col-md-12">
                     {% block body %}{% endblock %}
                 </div>
             </div>
         </main>
+        
         {% block globalJs %}
         <!-- Optional JavaScript -->
         <!-- jQuery first, then Popper.js, then Bootstrap JS -->

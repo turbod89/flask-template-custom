@@ -21,6 +21,11 @@ def init_app(app):
     app.register_blueprint(auth.bp_api)
 
     '''
+        Error handlers
+    '''
+    app.register_error_handler(404, main.page_not_found)
+
+    '''
         Special endpoints
     '''
     app.add_url_rule('/', endpoint='index')

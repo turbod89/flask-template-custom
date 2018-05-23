@@ -27,3 +27,6 @@ class User(Base):
             return "!! %s %s (%s)" % (self.firstname, self.lastname, self.email)
         else:
             return "%s %s (%s)" % (self.firstname, self.lastname, self.email)
+
+    def belongsTo(self,groupName):
+        return groupName in [ x.name for x in self.groups]
