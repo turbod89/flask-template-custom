@@ -8,16 +8,16 @@ def append(bp,bp_api):
     def logic():
         email = request.form['email'] if 'email' in request.form else None
         password = request.form['password'] if 'password' in request.form else None
-        firstname = request.form['firstname'] if 'firstname' in request.form else None
-        lastname = request.form['lastname'] if 'lastname' in request.form else None
+        first_name = request.form['first_name'] if 'first_name' in request.form else None
+        last_name = request.form['last_name'] if 'last_name' in request.form else None
         error = None
 
         if request.is_json:
             data = request.get_json()
             email = data['email'] or email
             password = data['password'] or password
-            firstname = data['firstname'] or firstname
-            lastname = data['lastname'] or lastname
+            first_name = data['first_name'] or first_name
+            last_name = data['last_name'] or last_name
 
         if not email:
             error = 'Email is required.'
@@ -29,7 +29,7 @@ def append(bp,bp_api):
                 error = 'User {} is already registered.'.format(email)
 
         if error is None:
-            user = models.auth.User(email=email, password = generate_password_hash(password), firstname = firstname, lastname=lastname)
+            user = models.auth.User(email=email, password = generate_password_hash(password), first_name = first_name, last_name=last_name)
             group = models.auth.Group.query.filter_by(name='active').first()
             user.groups.append(group)
             models.db.session.add(user)

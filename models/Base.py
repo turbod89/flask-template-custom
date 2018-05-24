@@ -7,3 +7,11 @@ class Base(db.Model):
     deleted = db.Column('deleted', db.Integer, nullable=False, default = 0)
     date_add = db.Column('date_add', db.DateTime, nullable=False, default = func.now())
     date_upd = db.Column('date_upd', db.DateTime, nullable=False, default = func.now())
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'deleted': self.deleted,
+            'date_add': self.date_add.isoformat(),
+            'date_upd': self.date_upd.isoformat(),
+        }

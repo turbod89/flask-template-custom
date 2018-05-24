@@ -22,7 +22,12 @@
                 <li class="nav-item">
                     <a href="{{ url_for('auth.register') }}" class ="nav-link">Sign up</a>
                 </li>
-            {% else %}
+                {% else %}
+                    {% if g.me.belongsTo('admin')%}
+                        <li class="nav-item active">
+                            <a href="{{ url_for('admin.users') }}" class = "nav-link">Administration</a>
+                        </li>        
+                    {% endif %}
                 <li class="nav-item active">
                     <a href="{{ url_for('auth.logout') }}" class = "nav-link">Log out</a>
                 </li>

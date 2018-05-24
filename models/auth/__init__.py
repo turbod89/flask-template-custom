@@ -20,22 +20,22 @@ def generate(db):
     
     users = [
         {
-            'firstname': 'admin',
-            'lastname': '',
+            'first_name': 'admin',
+            'last_name': '',
             'email': 'admin@example.com',
             'password': 'abc123',
             'groups': ['admin'],
         },
         {
-            'firstname': 'Gregory',
-            'lastname': 'House',
+            'first_name': 'Gregory',
+            'last_name': 'House',
             'email': 'ghouse@example.com',
             'password': 'abc123',
             'groups': ['active'],
         },
         {
-            'firstname': 'James',
-            'lastname': 'Wilson',
+            'first_name': 'James',
+            'last_name': 'Wilson',
             'email': 'jwilson@example.com',
             'password': 'abc123',
             'groups': ['active'],
@@ -48,8 +48,8 @@ def generate(db):
         
     for tUser in users:
           user = User(
-              firstname = tUser['firstname'],
-              lastname = tUser['lastname'],
+              first_name = tUser['first_name'],
+              last_name = tUser['last_name'],
               email = tUser['email'],
               password = generate_password_hash(tUser['password']),
           )

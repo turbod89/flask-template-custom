@@ -10,8 +10,8 @@ relUsersGroups = db.Table('relUsersGroups',
 class User(Base):
     __tablename__ = 'users'
 
-    firstname = db.Column('firstname', db.String(32), nullable = True)
-    lastname = db.Column('lastname', db.String(32), nullable = True)
+    first_name = db.Column('first_name', db.String(32), nullable = True)
+    last_name = db.Column('last_name', db.String(32), nullable = True)
     email = db.Column('email', db.String(128), nullable = False, unique = True)
     password = db.Column('password', db.String(128), nullable = False)
 
@@ -24,9 +24,20 @@ class User(Base):
 
     def __str__(self):
         if self.is_admin:
-            return "!! %s %s (%s)" % (self.firstname, self.lastname, self.email)
+            return "!! %s %s (%s)" % (self.first_name, self.last_name, self.email)
         else:
-            return "%s %s (%s)" % (self.firstname, self.lastname, self.email)
+            return "%s %s (%s)" % (self.first_name, self.last_name, self.email)
 
     def belongsTo(self,groupName):
         return groupName in [ x.name for x in self.groups]
+
+    def serialize(self):
+        obj = super(User,self).serialize()
+        
+        obj['first_name'] = self.first_name
+        obj['last_name'] = self.last_name
+        obj['email'] = self.email
+        obj['password'] = self.password
+        obj['groups'] = [ { key: group.serialize()[key] for key in ('id','name',) } for group in self.groups]
+
+        return obj

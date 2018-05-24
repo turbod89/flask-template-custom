@@ -1,0 +1,106 @@
+{% extends "layouts/layout.html" %}
+{% block body %}
+    <div class ="row" style="padding-top: 100px;">
+        <div class="col-12 text-center">
+            <h2>Groups</h2>
+        </div>
+    </div>
+    <div class ="row">
+        <div class="col-12">
+            <table class='table'>
+                <thead>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                </thead>
+                <tbody>
+                    {% for group in groups %}
+                        <tr>
+                            <th scope="row">{{ group.name }}</th>
+                            <td>{{ group.description }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class ="row" style="padding-top: 100px;">
+            <div class="col-12 text-center">
+                <h2>Users</h2>
+            </div>
+        </div>
+        <div class ="row">
+            <div class="col-12">
+                <table id='users-tbl' class='table'>
+                    <thead>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+{% endblock %}
+
+
+{% block localJs %}
+<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+<script>
+
+    $('document').ready(function () {
+
+        $.ajax({
+            url : '/api/admin/users',
+            dataType: 'json',
+            async: true,
+            type: 'GET',
+            data : {},
+            success: function (data) {
+                console.log(data)
+                $('#users-tbl').DataTable({
+                    "data": data,
+                    "columns": [
+                        {
+                            "title": "Id",
+                            "data": "id",
+                        },
+                        {
+                            "title": "Email",
+                            "data": "email",
+                        },
+                        {
+                            "title": "Groups",
+                            "data": "groups",
+                        },
+                        /*
+                        {
+                            "title": "Update",
+                            "data": "id"
+                        },
+                        */
+                    ],
+                    "columnDefs": [
+                        {"targets": [2], "render": function (data,type,row) {
+                            console.log(data.reduce((acc,curr) => acc+', '+curr.name))
+                            return  data.map(group => group.name).reduce((acc,curr) => acc+', '+curr)
+                        }},
+                        /*
+                        {"targets": [3], "render": function (data,type,row) {
+                            return  "<button class=\"btn btn-primary\"><i class=\"fas fa-sync-alt\" aria-hidden=\"true\"></i></button>"
+                        }},
+                        */
+                    ],
+
+                })
+            
+            },
+            error: function (data) { console.error(data)}
+        });
+
+    });
+
+</script>
+{% endblock %}
+
+{% block localCss %}
+<link rel=stylesheet type=text/css href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+{% endblock %}

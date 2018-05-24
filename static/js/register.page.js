@@ -4,8 +4,8 @@ const dataParser = data => {
         string to short
     */
     [
-        'firstname',
-        'lastname',
+        'first_name',
+        'last_name',
         'password',
         'repeatPassword',
     ].forEach( fieldname => {
@@ -38,8 +38,8 @@ const dataParser = data => {
 
 $('form.form-signup').submit(function (event) {
     let data = {
-        firstname: $('form.form-signup input#inputFirstname').val(),
-        lastname: $('form.form-signup input#inputLastname').val(),
+        first_name: $('form.form-signup input#inputFirst_name').val(),
+        last_name: $('form.form-signup input#inputLast_name').val(),
         password: $('form.form-signup input#inputPassword').val(),
         repeatPassword: $('form.form-signup input#inputRepeatPassword').val(),
     }
