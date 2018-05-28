@@ -2,98 +2,180 @@
 {% block body %}
     <div class ="row" style="padding-top: 100px;">
         <div class="col-12 text-center">
-            <h2>Groups</h2>
+            <h2>Users</h2>
         </div>
     </div>
     <div class ="row">
         <div class="col-12">
-            <table class='table'>
+            <table id='users-tbl' class='table'>
                 <thead>
-                    <th scope="col">Name</th>
-                    <th scope="col">Description</th>
                 </thead>
-                <tbody>
-                    {% for group in groups %}
-                        <tr>
-                            <th scope="row">{{ group.name }}</th>
-                            <td>{{ group.description }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
+                <tbody></tbody>
             </table>
         </div>
     </div>
-    <div class ="row" style="padding-top: 100px;">
-            <div class="col-12 text-center">
-                <h2>Users</h2>
-            </div>
-        </div>
-        <div class ="row">
-            <div class="col-12">
-                <table id='users-tbl' class='table'>
-                    <thead>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
 {% endblock %}
 
 
 {% block localJs %}
 <script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+
 <script>
 
+
+
     $('document').ready(function () {
+        
+        let groups = [];
 
-        $.ajax({
-            url : '/api/admin/users',
-            dataType: 'json',
-            async: true,
-            type: 'GET',
-            data : {},
-            success: function (data) {
-                console.log(data)
-                $('#users-tbl').DataTable({
-                    "data": data,
-                    "columns": [
-                        {
-                            "title": "Id",
-                            "data": "id",
-                        },
-                        {
-                            "title": "Email",
-                            "data": "email",
-                        },
-                        {
-                            "title": "Groups",
-                            "data": "groups",
-                        },
-                        /*
-                        {
-                            "title": "Update",
-                            "data": "id"
-                        },
-                        */
-                    ],
-                    "columnDefs": [
-                        {"targets": [2], "render": function (data,type,row) {
-                            console.log(data.reduce((acc,curr) => acc+', '+curr.name))
+        const createTable = groups => users => {
+            $('#users-tbl').DataTable({
+                "data": users,
+                "columns": [
+                    {
+                        "title": "Id",
+                        "data": "id",
+                    },
+                    {
+                        "title": "Email",
+                        "data": "email",
+                    },
+                    {
+                        "title": "Groups",
+                        "data": "groups",
+                    },
+                ],
+                "columnDefs": [
+                    {
+                        "targets": [2],
+                        "type": "html",
+                        "render": function (data,type,row,meta) {                            
                             return  data.map(group => group.name).reduce((acc,curr) => acc+', '+curr)
-                        }},
-                        /*
-                        {"targets": [3], "render": function (data,type,row) {
-                            return  "<button class=\"btn btn-primary\"><i class=\"fas fa-sync-alt\" aria-hidden=\"true\"></i></button>"
-                        }},
-                        */
-                    ],
+                        },
+                        "createdCell": function (td, cellData, rowData, row, col) {
 
-                })
+                            
+                            const select = document.createElement('div')
+                            select.classList.add('form-group')
+
+                            groups.forEach ( (group,i) => {
+                                const id = 'cb-user-groups-'+rowData['id']+'-'+i;
+                                
+                                
+                                const input = document.createElement('input')
+                                input.setAttribute('type','checkbox')
+                                input.setAttribute('id',id)
+                                input.setAttribute('name','groups')
+                                input.setAttribute('value',group.data)
+                                input.classList.add('form-check-input')
+
+                                const label = document.createElement('label')
+                                label.classList.add('form-check-label')
+                                label.setAttribute('for',id)
+                                label.appendChild(document.createTextNode(group.name))
+                                
+                                const option = document.createElement('div')
+                                option.classList.add('form-check')
+                                option.appendChild(input)
+                                option.appendChild(label)
+                                
+                                
+
+                                select.appendChild(option)
+                                if (cellData.findIndex( cellGroup => cellGroup.name === group.name) >= 0) {
+                                    input.setAttribute('checked','true')
+                                }
+                            })
+
+
+                            const submitBtn = document.createElement('button')
+                            submitBtn.classList.add('btn')
+                            submitBtn.classList.add('btn-primary')
+                            submitBtn.setAttribute('type','submit')
+                            submitBtn.appendChild(document.createTextNode('Save'))
+                            
+                            const submitBtnDiv = document.createElement('div')
+                            submitBtnDiv.classList.add('form-group')
+                            submitBtnDiv.appendChild(submitBtn)
+
+                            const form = document.createElement('form')
+                            form.style.padding = "16px"
+                            form.appendChild(select)
+                            form.appendChild(submitBtnDiv)
+                            form.appendChild(submitBtnDiv)
+                            $(form).submit(function (event) {
+                                event.preventDefault()
+                            })
+
+                            const dropdownFormDiv = document.createElement('div')
+                            dropdownFormDiv.classList.add('dropdown-menu')
+                            dropdownFormDiv.appendChild(form)
+
+                            const button = document.createElement('button')
+                            button.classList.add('btn')
+                            button.classList.add('btn-secondary')
+                            button.classList.add('dropdown-toggle')
+                            button.setAttribute('type','button')
+                            button.setAttribute('data-toggle','dropdown')
+                            button.appendChild(document.createTextNode('Groups'))
+                            
+
+                            const btnGroupDiv = document.createElement('div')
+                            btnGroupDiv.classList.add('btn-group')
+                            btnGroupDiv.appendChild(button)
+                            btnGroupDiv.appendChild(dropdownFormDiv)
+
+                            td.innerHTML = '';
+                            td.appendChild(btnGroupDiv)
+                        },
+                    
+                    },
+                ],
+                
+
+            })
+
+            $('#users-tbl tbody tr').click(function () {
+
+            }); 
             
-            },
-            error: function (data) { console.error(data)}
-        });
+        };
+
+        const getUsers = () => {
+
+            $.ajax({
+                url : '/api/admin/users',
+                dataType: 'json',
+                async: true,
+                type: 'GET',
+                data : {},
+                success: createTable(groups),
+                error: function (data) { console.error(data)}
+            });
+
+        }
+
+
+        const getGroups = () => {
+
+            $.ajax({
+                url : '/api/admin/groups',
+                dataType: 'json',
+                async: true,
+                type: 'GET',
+                data : {},
+                success: function (data) {
+                    groups = data;
+                    getUsers();
+                },
+                error: function (data) { console.error(data)}
+            });
+
+        }
+
+        getGroups();
 
     });
 
@@ -101,6 +183,11 @@
 {% endblock %}
 
 {% block localCss %}
-<link rel=stylesheet type=text/css href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+<!--
+    <link rel=stylesheet type=text/css href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+-->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
+
 {% endblock %}

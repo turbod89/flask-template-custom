@@ -1,0 +1,27 @@
+{% extends "layouts/layout.html" %}
+{% block body %}
+    <div class ="row" style="padding-top: 100px;">
+        <div class="col-12 text-center">
+            <h2>Groups</h2>
+        </div>
+    </div>
+    <div class ="row">
+        <div class="col-12">
+            <table class='table'>
+                <thead>
+                    <th scope="col">Name</th>
+                    <th scope="col">Description</th>
+                </thead>
+                <tbody>
+                    {% for group in groups %}
+                        <tr>
+                            <th scope="row">{{ group.name }}</th>
+                            <td>{{ group.description }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+{% endblock %}
