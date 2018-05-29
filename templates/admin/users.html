@@ -17,10 +17,18 @@
 {% endblock %}
 
 
+{% block localCss %}
+<!--
+    <link rel=stylesheet type=text/css href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+-->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+{% endblock %}
+
 {% block localJs %}
 <script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
+<script src="https://cdn.rawgit.com/turbod89/toDom/master/toDom.js"></script>
 
 <script>
 
@@ -29,6 +37,24 @@
     $('document').ready(function () {
         
         let groups = [];
+
+        const updateUserGroups = (user,groups, success) => {
+
+            $.ajax({
+                url : '/api/auth/setInGroup',
+                dataType: 'json',
+                contentType: "application/json; charset=utf-8",
+                async: true,
+                type: 'POST',
+                data : JSON.stringify({
+                    'userId': user.id,
+                    'groups': groups.map(group => group.name)
+                }),
+                success: success,
+                error: function (data) { console.error(data)}
+            });
+
+        }
 
         const createTable = groups => users => {
             $('#users-tbl').DataTable({
@@ -52,83 +78,92 @@
                         "targets": [2],
                         "type": "html",
                         "render": function (data,type,row,meta) {                            
-                            return  data.map(group => group.name).reduce((acc,curr) => acc+', '+curr)
+                            return data.map(group => group.name).reduce((acc,curr) => acc+', '+curr,'')
                         },
                         "createdCell": function (td, cellData, rowData, row, col) {
 
+                            const markedGroups = groups.map( group => 0 <= cellData.findIndex( cellGroup => cellGroup.id === group.id ));
                             
-                            const select = document.createElement('div')
-                            select.classList.add('form-group')
+                            const generateButtonText = () => {
+                                selectedGroups = [];
+                                markedGroups.forEach((mg,i) => {
+                                    if (mg) {
+                                        selectedGroups.push(groups[i].name)
+                                    }
+                                })
+                                return selectedGroups.join(', ')
+                            }
 
-                            groups.forEach ( (group,i) => {
-                                const id = 'cb-user-groups-'+rowData['id']+'-'+i;
-                                
-                                
-                                const input = document.createElement('input')
-                                input.setAttribute('type','checkbox')
-                                input.setAttribute('id',id)
-                                input.setAttribute('name','groups')
-                                input.setAttribute('value',group.data)
-                                input.classList.add('form-check-input')
-
-                                const label = document.createElement('label')
-                                label.classList.add('form-check-label')
-                                label.setAttribute('for',id)
-                                label.appendChild(document.createTextNode(group.name))
-                                
-                                const option = document.createElement('div')
-                                option.classList.add('form-check')
-                                option.appendChild(input)
-                                option.appendChild(label)
-                                
-                                
-
-                                select.appendChild(option)
-                                if (cellData.findIndex( cellGroup => cellGroup.name === group.name) >= 0) {
-                                    input.setAttribute('checked','true')
+                    
+                            const dropdownButton = toDom(['button',generateButtonText(),{'class':"btn btn-secondary dropdown-toggle", 'type':"button", 'data-toggle':"dropdown", 'aria-haspopup':"true", 'aria-expanded':"false"}])
+                            const refreshDropdownButton = () => {
+                                const children = dropdownButton.childNodes
+                                for (let i=0; i< children.length; i++) {
+                                    dropdownButton.removeChild(children[i])
                                 }
-                            })
-
-
-                            const submitBtn = document.createElement('button')
-                            submitBtn.classList.add('btn')
-                            submitBtn.classList.add('btn-primary')
-                            submitBtn.setAttribute('type','submit')
-                            submitBtn.appendChild(document.createTextNode('Save'))
+                                toDom(generateButtonText(),{at:dropdownButton})
+                            }
                             
-                            const submitBtnDiv = document.createElement('div')
-                            submitBtnDiv.classList.add('form-group')
-                            submitBtnDiv.appendChild(submitBtn)
-
-                            const form = document.createElement('form')
-                            form.style.padding = "16px"
-                            form.appendChild(select)
-                            form.appendChild(submitBtnDiv)
-                            form.appendChild(submitBtnDiv)
-                            $(form).submit(function (event) {
-                                event.preventDefault()
-                            })
-
-                            const dropdownFormDiv = document.createElement('div')
-                            dropdownFormDiv.classList.add('dropdown-menu')
-                            dropdownFormDiv.appendChild(form)
-
-                            const button = document.createElement('button')
-                            button.classList.add('btn')
-                            button.classList.add('btn-secondary')
-                            button.classList.add('dropdown-toggle')
-                            button.setAttribute('type','button')
-                            button.setAttribute('data-toggle','dropdown')
-                            button.appendChild(document.createTextNode('Groups'))
-                            
-
-                            const btnGroupDiv = document.createElement('div')
-                            btnGroupDiv.classList.add('btn-group')
-                            btnGroupDiv.appendChild(button)
-                            btnGroupDiv.appendChild(dropdownFormDiv)
-
                             td.innerHTML = '';
-                            td.appendChild(btnGroupDiv)
+
+                            const dropdown = toDom(['div',{'class':'dropdown btn-group'},
+                                dropdownButton,
+                                ['div',{'class':'dropdown-menu'},
+                                    ['form',{'class':'px-4 py-3'},
+                                        [(group,i) => {
+                                            
+                                            const id = 'dropdownCheck-'+rowData.id+'-'+group.id
+                                            const checkboxAttributes = {'value': i,'type':'checkbox','class':'form-check-input','id': id}
+
+                                            if ( markedGroups[i]) {
+                                                checkboxAttributes['checked'] = true
+                                            }
+
+                                            return ['div',{'class':'form-check'},
+                                                    [
+                                                        ['input',checkboxAttributes,
+                                                            function $click(event) {
+                                                                markedGroups[this.value] = this.checked
+                                                                refreshDropdownButton()
+                                                            },
+                                                        ],
+                                                        ['label',group.name,{'class': 'form-check-label','for':id}],
+                                                        
+                                                    ]
+                                                ]
+                                            
+                                        }, groups],
+                                    ]
+                                ],
+
+                            ])
+
+                            const refreshButton = toDom(['button',{'type':'button','class':'btn btn-secondary'},
+                                ['i',{'class': 'fa fa-sync'}],
+                                function $click(event) {
+                                    
+                                    newGroups = []
+                                    markedGroups.forEach( (mg,i) => {
+                                        if (mg) {
+                                            newGroups.push(groups[i])
+                                        }
+                                    })
+                                    
+                                    const btn = this;
+                                    btn.classList.add('disabled')
+
+                                    updateUserGroups(rowData,newGroups, function (data) {
+                                        console.log(data)
+                                        btn.classList.remove('disabled')
+                                    })
+                                    
+                                }
+                            ])
+
+                            toDom(['div', {'class': 'btn-group', 'role': 'group'},
+                                refreshButton,
+                                dropdown,
+                            ],{at:td})
                         },
                     
                     },
@@ -180,14 +215,4 @@
     });
 
 </script>
-{% endblock %}
-
-{% block localCss %}
-<!--
-    <link rel=stylesheet type=text/css href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
--->
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css">
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css">
-
 {% endblock %}

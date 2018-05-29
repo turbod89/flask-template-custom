@@ -2,6 +2,7 @@ from flask import Blueprint, flash, g, redirect, render_template, request, sessi
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from ... import models
+from .. import auth
 
 
 def append(bp,bp_api):
@@ -11,20 +12,21 @@ def append(bp,bp_api):
 
 
     @bp.route('/users', methods=('GET',))
+    @auth.login_required
+    @auth.group_required('active')
+    @auth.group_required('admin')
+    @auth.notin_group_required('blocked')
     def users():
-        if not allowed():
-            return abort(404)
-            
-
         return render_template('admin/users.html', me = g.me, groups = models.auth.Group.query.all())
 
 
 
     @bp_api.route('/users', methods=('GET',))
+    @auth.login_required
+    @auth.group_required('active')
+    @auth.group_required('admin')
+    @auth.notin_group_required('blocked')
     def api_users():
-        if not allowed():
-            return abort(404)
-            
         users = models.auth.User.query.all()
         users_json = [ user.serialize() for user in users]
         return jsonify(users_json)

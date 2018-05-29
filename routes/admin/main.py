@@ -2,19 +2,15 @@ from flask import Blueprint, flash, g, redirect, render_template, request, sessi
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from ... import models
-
+from .. import auth
 
 def append(bp,bp_api):
 
-    def allowed():
-        return (g.me is not None) and (g.me.belongsTo('admin'))
-
-
     @bp.route('/', methods=('GET',))
+    @auth.login_required
+    @auth.group_required('active')
+    @auth.group_required('admin')
+    @auth.notin_group_required('blocked')
     def main():
-        if not allowed():
-            return abort(404)
-            
-
         return render_template('admin/main.html', me = g.me, groups = models.auth.Group.query.all())
 

@@ -15,6 +15,7 @@ def init_app(app):
     def load_logged_in_user():
         auth.load_logged_in_user()
 
+
     '''
         Register modules
     '''

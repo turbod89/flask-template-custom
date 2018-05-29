@@ -14,8 +14,9 @@ def generate(db):
 
     groups = [
         {'name':'admin', 'description': 'This is the group of admins. Full access to all data.'},
-        {'name':'active', 'description': 'Regular users. They are allowed to do regular things.'},
-        {'name':'block', 'description': 'Blocked users. The only they can do is loggin.'},
+        {'name':'active', 'description': 'Active users. Only users in this group will exists at logic effects.'},
+        {'name':'registered', 'description': 'Registered users which have not actived their account yet.'},
+        {'name':'blocked', 'description': 'Blocked users. The only they can do is loggin.'},
     ]
     
     users = [
@@ -24,7 +25,7 @@ def generate(db):
             'last_name': '',
             'email': 'admin@example.com',
             'password': 'abc123',
-            'groups': ['admin'],
+            'groups': ['admin','active'],
         },
         {
             'first_name': 'Gregory',
@@ -37,6 +38,34 @@ def generate(db):
             'first_name': 'James',
             'last_name': 'Wilson',
             'email': 'jwilson@example.com',
+            'password': 'abc123',
+            'groups': ['active'],
+        },
+        {
+            'first_name': 'Lisa',
+            'last_name': 'Cuddy',
+            'email': 'lcuddy@example.com',
+            'password': 'abc123',
+            'groups': ['active'],
+        },
+        {
+            'first_name': 'Allison',
+            'last_name': 'Cameron',
+            'email': 'acameron@example.com',
+            'password': 'abc123',
+            'groups': ['active'],
+        },
+        {
+            'first_name': 'Eric',
+            'last_name': 'Foremant',
+            'email': 'eforeman@example.com',
+            'password': 'abc123',
+            'groups': ['active'],
+        },
+        {
+            'first_name': 'Rober',
+            'last_name': 'Chase',
+            'email': 'rchase@example.com',
             'password': 'abc123',
             'groups': ['active'],
         },

@@ -30,7 +30,7 @@ def append(bp,bp_api):
 
         if error is None:
             user = models.auth.User(email=email, password = generate_password_hash(password), first_name = first_name, last_name=last_name)
-            group = models.auth.Group.query.filter_by(name='active').first()
+            group = models.auth.Group.query.filter_by(name='registered').first()
             user.groups.append(group)
             models.db.session.add(user)
             models.db.session.commit()
