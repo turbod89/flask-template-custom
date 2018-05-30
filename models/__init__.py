@@ -1,6 +1,5 @@
 import click
 from flask import current_app, g
-from flask.cli import with_appcontext
 
 from .db import db
 from . import auth
@@ -29,26 +28,6 @@ def init_app (app):
         if session is not None:
             session.close()
 
-    def reset_db():
-        print ('Destroying database...')
-        db.drop_all()
-        print('Commiting...')
-        db.session.commit()
-        print('Creating all again...')
-        db.create_all()
-        print('Comminting...')
-        db.session.commit()
-        print('Generating auth module...')
-        auth.generate(db)
-
-
-    @app.cli.command('reset-db')
-    @with_appcontext
-    def reset_db_command():
-        """Clear the existing data and create new tables."""
-        reset_db()
-    app.cli.add_command(reset_db_command)
- 
     app.teardown_appcontext(close_db_session)
 
 

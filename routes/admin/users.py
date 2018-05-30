@@ -7,9 +7,6 @@ from .. import auth
 
 def append(bp,bp_api):
 
-    def allowed():
-        return (g.me is not None) and (g.me.belongsTo('admin'))
-
 
     @bp.route('/users', methods=('GET',))
     @auth.login_required

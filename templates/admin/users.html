@@ -75,6 +75,10 @@
                 ],
                 "columnDefs": [
                     {
+                        "targets": [0],
+                        "visible": false,
+                    },
+                    {
                         "targets": [2],
                         "type": "html",
                         "render": function (data,type,row,meta) {                            
@@ -82,7 +86,19 @@
                         },
                         "createdCell": function (td, cellData, rowData, row, col) {
 
+                            const maxLengthDropdown = 16;
                             const markedGroups = groups.map( group => 0 <= cellData.findIndex( cellGroup => cellGroup.id === group.id ));
+                            const savedMarkedGroups = markedGroups.slice()
+                            const haveMarkedGroupsChanged = markedGroups => {
+
+                                for (let i = 0; i < markedGroups.length; i++) {
+                                    if (markedGroups[i] !== savedMarkedGroups[i]) {
+                                        return true
+                                    }
+                                }
+
+                                return false
+                            }
                             
                             const generateButtonText = () => {
                                 selectedGroups = [];
@@ -91,7 +107,11 @@
                                         selectedGroups.push(groups[i].name)
                                     }
                                 })
-                                return selectedGroups.join(', ')
+                                const text = selectedGroups.join(', ')
+                                if (text.length > maxLengthDropdown) {
+                                    return text.substr(0,maxLengthDropdown-3)+'...'
+                                }
+                                return text
                             }
 
                     
@@ -104,7 +124,33 @@
                                 toDom(generateButtonText(),{at:dropdownButton})
                             }
                             
-                            td.innerHTML = '';
+
+                            const refreshButton = toDom(['button',{'type':'button','class':'btn btn-secondary disabled'},
+                                ['i',{'class': 'fa fa-sync'}],
+                                function $click(event) {
+                                    if (this.classList.contains('disabled')) {
+                                        return
+                                    }
+                                    
+                                    newGroups = []
+                                    markedGroups.forEach( (mg,i) => {
+                                        if (mg) {
+                                            newGroups.push(groups[i])
+                                        }
+                                    })
+                                    
+                                    const btn = this;
+                                    btn.classList.remove('disabled')
+
+                                    updateUserGroups(rowData,newGroups, function (data) {
+                                        btn.classList.add('disabled')
+                                        for (let i = 0; i < markedGroups.length; i++) {
+                                            savedMarkedGroups[i] = markedGroups[i]
+                                        }
+                                    })
+                                    
+                                }
+                            ]);
 
                             const dropdown = toDom(['div',{'class':'dropdown btn-group'},
                                 dropdownButton,
@@ -123,8 +169,17 @@
                                                     [
                                                         ['input',checkboxAttributes,
                                                             function $click(event) {
+                                                            },
+                                                            function $change(event) {
+
                                                                 markedGroups[this.value] = this.checked
                                                                 refreshDropdownButton()
+
+                                                                if (haveMarkedGroupsChanged(markedGroups)) {
+                                                                    refreshButton.classList.remove('disabled')
+                                                                } else {
+                                                                    refreshButton.classList.add('disabled')
+                                                                }
                                                             },
                                                         ],
                                                         ['label',group.name,{'class': 'form-check-label','for':id}],
@@ -138,31 +193,11 @@
 
                             ])
 
-                            const refreshButton = toDom(['button',{'type':'button','class':'btn btn-secondary'},
-                                ['i',{'class': 'fa fa-sync'}],
-                                function $click(event) {
-                                    
-                                    newGroups = []
-                                    markedGroups.forEach( (mg,i) => {
-                                        if (mg) {
-                                            newGroups.push(groups[i])
-                                        }
-                                    })
-                                    
-                                    const btn = this;
-                                    btn.classList.add('disabled')
 
-                                    updateUserGroups(rowData,newGroups, function (data) {
-                                        console.log(data)
-                                        btn.classList.remove('disabled')
-                                    })
-                                    
-                                }
-                            ])
-
+                            td.innerHTML = '';
                             toDom(['div', {'class': 'btn-group', 'role': 'group'},
-                                refreshButton,
                                 dropdown,
+                                refreshButton,
                             ],{at:td})
                         },
                     

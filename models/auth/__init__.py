@@ -6,9 +6,9 @@ from .Group import Group
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
-def init_app(app,db):
-    print('models/auth/__init__.py init_app(app)')
-    #generateRelationships(db)
+
+from flask.cli import with_appcontext
+
 
 def generate(db):
 
@@ -98,3 +98,27 @@ def generate(db):
 
 
 
+
+def init_app(app,db):
+    print('models/auth/__init__.py init_app(app)')
+    
+    def reset_db():
+        print ('Destroying database...')
+        db.drop_all()
+        print('Commiting...')
+        db.session.commit()
+        print('Creating all again...')
+        db.create_all()
+        print('Comminting...')
+        db.session.commit()
+        print('Generating auth module...')
+        generate(db)
+
+
+    @app.cli.command('reset-db')
+    @with_appcontext
+    def reset_db_command():
+        """Clear the existing data and create new tables."""
+        reset_db()
+    app.cli.add_command(reset_db_command)
+ 
