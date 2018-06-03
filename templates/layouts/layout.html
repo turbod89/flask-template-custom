@@ -43,6 +43,9 @@
             socket.on('connect', function () {
                 socket.emit('my event', { data: 'I\'m connected!' });
             });
+            socket.on('message',function (data) {
+                console.log(data)
+            })
         </script>
         {% endblock %}
         {% block localJs %}{% endblock %}

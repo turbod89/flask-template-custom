@@ -26,4 +26,6 @@ def create_app(config_name):
     @socketio.on('my event')
     def handle_message(message):
         print('received message: ' + str(message))
+        socketio.emit('message','hello')
+
     return app
