@@ -2,9 +2,7 @@ import os
 from flask import Flask
 
 from .config import Configuration
-from . import models, routes
-
-from flask_socketio import SocketIO
+from . import models, routes, socketio
 
 def create_app(config_name):
     print('create_app.py create_app(config_name)')
@@ -20,12 +18,6 @@ def create_app(config_name):
 
     models.init_app(app)
     routes.init_app(app)
-
-    socketio = SocketIO(app)
-
-    @socketio.on('my event')
-    def handle_message(message):
-        print('received message: ' + str(message))
-        socketio.emit('message','hello')
+    socketio.init_app(app)
 
     return app
