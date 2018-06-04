@@ -3,32 +3,98 @@
     <div class ="row" style="padding-top: 100px;">
         <div id='info'></div>
         <div class="col-12 text-center">
-
             <h1>Welcome {{me.first_name}}</h1>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi aliquam, massa vitae tempus laoreet, ligula velit vehicula nulla, quis consectetur neque tellus non arcu. Fusce magna lacus, consectetur a dignissim vitae, fringilla ac ligula. Maecenas pulvinar est blandit mauris vulputate fermentum. Quisque posuere sit amet ante vitae tempor. Vivamus finibus condimentum ultrices. Sed et ligula elit. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Quisque suscipit sapien enim, nec bibendum ante ultricies vel.</p>
-            <p>Donec facilisis, magna in sollicitudin accumsan, risus risus mollis urna, vitae vestibulum dolor nisl nec odio. Pellentesque iaculis elit ut nunc congue, nec sodales purus accumsan. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. In sit amet arcu suscipit magna dapibus imperdiet. Donec ut congue tortor. Donec eleifend sem sed massa mollis eleifend. Aenean dictum in massa ac rutrum. Pellentesque congue congue sapien, nec vehicula est sagittis et. Aliquam erat volutpat. Mauris eleifend tellus sed nisi bibendum pharetra. Nunc gravida nisl eu tellus lacinia, quis fringilla ante maximus. Mauris congue ut justo quis gravida.</p>
-            <p>Vestibulum lobortis felis ut eros feugiat vestibulum. Phasellus placerat sapien ac neque congue rhoncus. Cras eget felis mauris. Morbi ipsum turpis, tincidunt ut libero a, convallis cursus leo. Phasellus mollis libero non velit congue, at aliquet ligula iaculis. Quisque volutpat magna egestas, auctor neque ac, varius magna. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vivamus vel odio ante. Mauris condimentum tellus ante, sit amet vehicula sapien egestas porttitor. Maecenas malesuada enim id tempus dignissim. Aliquam sit amet tempor quam. Pellentesque nec lacus ligula. Quisque nibh risus, sagittis ut hendrerit at, fermentum vel magna. Suspendisse semper erat a arcu venenatis, ut consequat massa consequat. Donec sodales magna sed nisi tincidunt tempus.</p>
+        </div>
+        <div class="col-12 text-center">
+            <table id='connUsers-tbl' class='table'>
+                <thead></thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 {% endblock %}
+{% block localCss %}
+<!--
+    <link rel=stylesheet type=text/css href="//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+-->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+{% endblock %}
 
 {% block localJs %}
+<script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
 <script src="https://cdn.rawgit.com/turbod89/toDom/master/toDom.js"></script>
+
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
-<script type="text/javascript" charset="utf-8">
+<script>
 
-    var socket = io.connect('http://' + document.domain + ':' + location.port);
+    const socket = io.connect('http://' + document.domain + ':' + location.port);
+</script>
 
-    socket.on('connect', function (data) {
-        console.log(data)
-    });
+<script>
 
+    const createTable = () => {
+        $('#connUsers-tbl').DataTable({
+            "data": [],
+            "columns": [
+                {
+                    "title": "Email",
+                    "data": "email",
+                },
+                {
+                    "title": "Message",
+                    "data": "email",
+                },
+            ],
+            "columnDefs": [
+                {
+                    "targets":[1],
+                    "render": function (data,type,row,meta) {
+                        return "";
+                    },
+                    "createdCell": function(td,cellData,rowData,row,col) {
+                        const input = toDom(['input',{'type':'text'},
 
-    socket.on('message', function (data) {
-        console.log(data)
-        toDom(['p',
-            JSON.stringify(data)
-        ],{at:'#info'})
+                        ])
+
+                        
+                        toDom([
+                            input,
+                            ['button','Send',
+                                function $click(event) {
+                                    console.log(input.value)
+                                    socket.emit('send message to user',rowData.email,input.value)
+                                    input.value = ''
+                                }
+                            ],
+
+                        ],{at:td})
+                    }
+                }
+            ],
+
+        });
+    }
+
+    const refreshTable = data => {
+        const table = $('#connUsers-tbl').DataTable();
+        table.clear()
+        table.rows.add(data)
+        table.draw();
+    }
+
+    $(document).ready(function () {
+        createTable()
+        
+        socket.on('connected users', function (data) {
+            console.log(data)
+            refreshTable(data)
+        })
+
+        socket.on('connect',function (data) {
+            console.log(data)
+        })
     })
 </script>
 {% endblock %}

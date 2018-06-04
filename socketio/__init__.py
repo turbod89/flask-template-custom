@@ -18,7 +18,7 @@ def init_app(app):
     connectedUsers = []
 
     def emitUsers():
-        socketio.emit('message',[email for email in connectedUsers])
+        socketio.emit('connected users',[{'email': user['email']} for user in connectedUsers],json = True)
 
     @socketio.on('connect')
     def connect():
@@ -32,15 +32,29 @@ def init_app(app):
 
             if connUser is None:
                 connectedUsers.append({
+                    'userId': g.me.id,
                     'email': g.me.email,
                     'sid': request.sid
                 })
-                emitUsers()
+            
+            emitUsers()
+
+            print(str(connectedUsers))
+
+        else:
+            print('here')
 
     @socketio.on('disconnect')
     def disconnect():
         routes.auth.load_logged_in_user()
 
         if g.me is not None:
-            connectedUsers.remove(g.me.email)
+            conn = next( x for x in connectedUsers if x['userId'] == g.me.id)
+            connectedUsers.remove(conn)
             emitUsers()
+
+            print(str(connectedUsers))
+
+    @socketio.on('send message to user')
+    def send_message_to_user(email,message):
+        print('>>>> '+email + ' ' + message)
