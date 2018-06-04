@@ -59,7 +59,7 @@ def append(bp,bp_api):
                     'description': 'Group {} is already registered.'.format(name),
                 })
 
-        if len(errors) is None:
+        if len(errors) == 0:
             group = models.auth.Group(name=name, description=description)
             
             models.db.session.add(group)
@@ -75,12 +75,12 @@ def append(bp,bp_api):
     @auth.notin_group_required('blocked')
     def api_delete_group():
             
-        id = request.form['groupId'] if 'groupId' in request.form else None
+        id = None if 'groupId' not in request.form else request.form['groupId']
         errors = []
 
         if request.is_json:
             data = request.get_json()
-            id = data['groupId'] or id
+            id = id if 'groupId' not in data else data['groupId']
 
         if not id:
             errors.append({
@@ -95,7 +95,7 @@ def append(bp,bp_api):
                     'description': 'Group with {} does not exists.'.format(name),
                 })
 
-            elif len(errors) is None:
+            elif len(errors) == 0:
                 
                 models.db.session.delete(group)
                 models.db.session.commit()

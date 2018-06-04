@@ -60,46 +60,128 @@
 <script>
 
 
+    const dataAddGroupParser = data => {
+
+        /*
+            string to short
+        */
+        [
+            'name',
+        ].forEach( fieldname => {
+
+            
+            if (data[fieldname].trim().length < 2) {
+                return {
+                    code: 1,
+                    value: fieldname,
+                }
+            } else {
+                data[fieldname] = data[fieldname].trim()
+            }
+        })
+
+        return {code: 0, data: data}
+    }
+
+    const createTable = getGroups => {
+
+        $('#groups-tbl').DataTable({
+            "data": [],
+            "columns": [
+                {
+                    "title": "Id",
+                    "data": "id",
+                },
+                
+                {
+                    "title": "Name",
+                    "data": "name",
+                },
+                {
+                    "title": "Description",
+                    "data": "description",
+                },
+                {
+                    "title": "Actions",
+                    "data": "id",
+                },
+            ],
+            "columnDefs": [
+                {
+                    "targets": [0],
+                    "visible": false,
+                },
+                {
+                    "targets": [3],
+                    "render": function (data,type,row,meta) {
+                        return "";
+                    },
+                    "createdCell": function(td,cellData,rowData,row,col) {
+
+                        toDom(['button',{'class': 'btn btn-outline-danger'}, 
+                            ['i',{'class':'fa fa-trash-alt'}],
+                            function $click (event) {
+                                
+                                $.ajax({
+                                    url : '/api/admin/group',
+                                    type: 'DELETE',
+                                    dataType: 'json',
+                                    contentType: "application/json; charset=utf-8",
+                                    async: true,
+                                    data : JSON.stringify({groupId: rowData.id}),
+                                    success: function (data) { console.error(data); getGroups();},
+                                    error: function (data) { console.error(data)}
+                                });
+                            }
+                        ],{at:td})
+                    },
+                }
+            ],
+            
+
+        });
+
+    }
+
+
+    const refreshTable = data => {
+        const table = $('#groups-tbl').DataTable();
+        table.clear()
+        table.rows.add(data)
+        table.draw();
+    }
+
+    const getGroups = () => {
+
+        $.ajax({
+            url : '/api/admin/groups',
+            dataType: 'json',
+            async: true,
+            type: 'GET',
+            data : {},
+            success: refreshTable,
+            error: function (data) { console.error(data)}
+        });
+
+    }
+
 
     $('document').ready(function () {
 
-        const dataAddGroupParser = data => {
-
-            /*
-                string to short
-            */
-            [
-                'name',
-            ].forEach( fieldname => {
-
-                
-                if (data[fieldname].trim().length < 2) {
-                    return {
-                        code: 1,
-                        value: fieldname,
-                    }
-                } else {
-                    data[fieldname] = data[fieldname].trim()
-                }
-            })
-
-            return {code: 0, data: data}
-        }
 
         $('button#btnAddGroup').click(function (event) {
-            console.log('here')
             event.preventDefault();
-
+            
             let data = {
                 name: $('input#inputName').val(),
                 description: $('input#inputDescription').val(),
             }
-
+            
             const error = dataAddGroupParser(data);
             if ( error.code != 0) {
                 return
             }
-
+            
             $.ajax({
                 url : '/api/admin/group',
                 dataType: 'json',
@@ -107,91 +189,13 @@
                 async: true,
                 type: 'POST',
                 data : JSON.stringify(error.data),
-                success: function (data) { console.error(data)},
+                success: function (data) { console.error(data); getGroups()},
                 error: function (data) { console.error(data)}
             });
-
+            
         });
         
-        const createTable = groups => {
-            $('#groups-tbl').DataTable({
-                "data": groups,
-                "columns": [
-                    {
-                        "title": "Id",
-                        "data": "id",
-                    },
-                   
-                    {
-                        "title": "Name",
-                        "data": "name",
-                    },
-                    {
-                        "title": "Description",
-                        "data": "description",
-                    },
-                    {
-                        "title": "Actions",
-                        "data": "id",
-                    },
-                ],
-                "columnDefs": [
-                    {
-                        "targets": [0],
-                        "visible": false,
-                    },
-                    {
-                        "targets": [3],
-                        "render": function (data,type,row,meta) {
-                            return "";
-                        },
-                        "createdCell": function(td,cellData,rowData,row,col) {
-
-                            toDom(['button',{'class': 'btn btn-outline-danger'}, 
-                                ['i',{'class':'fa fa-trash-alt'}],
-                                function $click (event) {
-                                    console.log('here')
-
-                                    $.ajax({
-                                        url : '/api/admin/group',
-                                        type: 'DELETE',
-                                        dataType: 'json',
-                                        contentType: "application/json; charset=utf-8",
-                                        async: true,
-                                        data : JSON.stringify({groupId: cellData.id}),
-                                        success: function (data) { console.error(data)},
-                                        error: function (data) { console.error(data)}
-                                    });
-                                }
-                            ],{at:td})
-                        },
-                    }
-                ],
-                
-
-            });
-
-            $('#groups-tbl tbody tr').click(function () {
-
-            }); 
-            
-        };
-
-
-        const getGroups = () => {
-
-            $.ajax({
-                url : '/api/admin/groups',
-                dataType: 'json',
-                async: true,
-                type: 'GET',
-                data : {},
-                success: createTable,
-                error: function (data) { console.error(data)}
-            });
-
-        }
-
+        const table = createTable(getGroups)
         getGroups();
 
     });
