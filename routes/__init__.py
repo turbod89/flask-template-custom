@@ -1,6 +1,6 @@
 from flask import current_app, g, jsonify, Blueprint, session
 from .. import models
-from . import auth, main, admin
+from . import auth, main, admin, socketExamples
 
 def init_app(app):
     print('routes/__init__.py init_app(app)')
@@ -12,6 +12,8 @@ def init_app(app):
     @main.bp.before_app_request
     @admin.bp.before_app_request
     @admin.bp_api.before_app_request
+    @socketExamples.bp.before_app_request
+    @socketExamples.bp_api.before_app_request
     def load_logged_in_user():
         auth.load_logged_in_user()
 
@@ -24,6 +26,8 @@ def init_app(app):
     app.register_blueprint(auth.bp_api)
     app.register_blueprint(admin.bp)
     app.register_blueprint(admin.bp_api)
+    app.register_blueprint(socketExamples.bp)
+    app.register_blueprint(socketExamples.bp_api)
 
     '''
         Error handlers
