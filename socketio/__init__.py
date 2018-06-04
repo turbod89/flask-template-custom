@@ -3,24 +3,15 @@ from flask_socketio import SocketIO
 
 from .. import models, routes
 
-def generateToken(user):
-    return str(user.email)
-
-def checkUserWithToken(user,token):
-    if str(user.email) == token:
-        return True
-
-    return False
-
 def init_app(app):
 
     socketio = SocketIO(app)
     connectedUsers = []
 
     def emitUsers():
-        socketio.emit('connected users',[{'email': user['email']} for user in connectedUsers],json = True)
+        socketio.emit('connected users',[{'email': user['email']} for user in connectedUsers],json = True,namespace='/chat')
 
-    @socketio.on('connect')
+    @socketio.on('connect',namespace='/chat')
     def connect():
         routes.auth.load_logged_in_user()
         
@@ -39,12 +30,7 @@ def init_app(app):
             
             emitUsers()
 
-            print(str(connectedUsers))
-
-        else:
-            print('here')
-
-    @socketio.on('disconnect')
+    @socketio.on('disconnect',namespace='/chat')
     def disconnect():
         routes.auth.load_logged_in_user()
 
@@ -55,12 +41,11 @@ def init_app(app):
 
             print(str(connectedUsers))
 
-    @socketio.on('send message to user')
+    @socketio.on('send message to user', namespace='/chat')
     def send_message_to_user(email,message):
         
         routes.auth.load_logged_in_user()
         
         if g.me is not None:
-            print('>>>> From '+g.me.email + ' to '+email+': ' + message)
             conn = next( x for x in connectedUsers if x['email'] == email)
-            socketio.emit('get message from user',(g.me.email, message,), room=conn['sid'])
+            socketio.emit('get message from user',(g.me.email, message,), room=conn['sid'],namespace ='/chat')
