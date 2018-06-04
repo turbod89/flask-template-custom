@@ -7,13 +7,22 @@ from .. import models, routes
 
 class Chat(Namespace):
 
+    '''
+        Constructor
+    '''
     def __init__(self, *args, **kwargs):
         self.connectedUsers = []
         super(Chat,self).__init__(*args,**kwargs)
 
+    '''
+        Helpers
+    '''
     def emitUsers(self):
         emit('connected_users',[{'email': user['email']} for user in self.connectedUsers],json = True)
 
+    '''
+        On connect
+    '''
     def on_connect(self):
         routes.auth.load_logged_in_user()
         
@@ -33,6 +42,9 @@ class Chat(Namespace):
             self.emitUsers()
 
     
+    '''
+        On disconnect
+    '''
     def on_disconnect(self):
         routes.auth.load_logged_in_user()
 
@@ -44,10 +56,13 @@ class Chat(Namespace):
             print(str(self.connectedUsers))
 
     
+    '''
+        On custom events
+    '''
     def on_send_message_to_user(self,email,message):
         
         routes.auth.load_logged_in_user()
         
         if g.me is not None:
             conn = next( x for x in self.connectedUsers if x['email'] == email)
-            emit('get_message_from_user',(g.me.email, message,), room=conn['sid'],namespace ='/chat')
+            emit('get_message_from_user',(g.me.email, message,), room=conn['sid'])
