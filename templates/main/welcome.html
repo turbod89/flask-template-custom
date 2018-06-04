@@ -73,7 +73,7 @@
                                 function $click(event) {
                                     if (input.value !== '') {
                                         console.log(input.value)
-                                        socket.emit('send message to user',rowData.email,input.value)
+                                        socket.emit('send_message_to_user',rowData.email,input.value)
                                         input.value = ''
                                         input.focus()
                                     }
@@ -98,7 +98,7 @@
     $(document).ready(function () {
         createTable()
         
-        socket.on('connected users', function (data) {
+        socket.on('connected_users', function (data) {
             console.log(data)
             refreshTable(data)
         })
@@ -107,7 +107,7 @@
             console.log(data)
         })
 
-        socket.on('get message from user',function (email,message) {
+        socket.on('get_message_from_user',function (email,message) {
             console.log('From '+email+':',message)
         })
     })

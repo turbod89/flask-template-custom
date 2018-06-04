@@ -1,3 +1,53 @@
-from flask_socketio import SocketIO
+from flask import g, session, request
+
+from flask_socketio import Namespace, emit
+
+from .. import models, routes
 
 
+class Chat(Namespace):
+
+    def __init__(self, *args, **kwargs):
+        self.connectedUsers = []
+        super(Chat,self).__init__(*args,**kwargs)
+
+    def emitUsers(self):
+        emit('connected_users',[{'email': user['email']} for user in self.connectedUsers],json = True)
+
+    def on_connect(self):
+        routes.auth.load_logged_in_user()
+        
+        if g.me is not None:
+            connUser = None
+            for conn in self.connectedUsers:
+                if conn['email'] == g.me.email:
+                    connUser = conn
+
+            if connUser is None:
+                self.connectedUsers.append({
+                    'userId': g.me.id,
+                    'email': g.me.email,
+                    'sid': request.sid
+                })
+            
+            self.emitUsers()
+
+    
+    def on_disconnect(self):
+        routes.auth.load_logged_in_user()
+
+        if g.me is not None:
+            conn = next( x for x in self.connectedUsers if x['userId'] == g.me.id)
+            self.connectedUsers.remove(conn)
+            self.emitUsers()
+
+            print(str(self.connectedUsers))
+
+    
+    def on_send_message_to_user(self,email,message):
+        
+        routes.auth.load_logged_in_user()
+        
+        if g.me is not None:
+            conn = next( x for x in self.connectedUsers if x['email'] == email)
+            emit('get_message_from_user',(g.me.email, message,), room=conn['sid'],namespace ='/chat')
