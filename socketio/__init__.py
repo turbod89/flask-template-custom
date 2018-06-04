@@ -62,3 +62,5 @@ def init_app(app):
         
         if g.me is not None:
             print('>>>> From '+g.me.email + ' to '+email+': ' + message)
+            conn = next( x for x in connectedUsers if x['email'] == email)
+            socketio.emit('get message from user',(g.me.email, message,), room=conn['sid'])

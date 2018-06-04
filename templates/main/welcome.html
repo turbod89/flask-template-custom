@@ -75,7 +75,7 @@
                                         console.log(input.value)
                                         socket.emit('send message to user',rowData.email,input.value)
                                         input.value = ''
-                                        intput.focus()
+                                        input.focus()
                                     }
                                 }
                             ],
@@ -105,6 +105,10 @@
 
         socket.on('connect',function (data) {
             console.log(data)
+        })
+
+        socket.on('get message from user',function (email,message) {
+            console.log('From '+email+':',message)
         })
     })
 </script>
