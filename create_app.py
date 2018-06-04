@@ -2,7 +2,7 @@ import os
 from flask import Flask
 
 from .config import Configuration
-from . import models, routes
+from . import models, routes, socketio
 
 def create_app(config_name):
     print('create_app.py create_app(config_name)')
@@ -18,5 +18,6 @@ def create_app(config_name):
 
     models.init_app(app)
     routes.init_app(app)
+    socketio.init_app(app)
 
     return app
