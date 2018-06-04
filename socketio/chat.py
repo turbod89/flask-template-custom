@@ -18,7 +18,8 @@ class Chat(Namespace):
         Helpers
     '''
     def emitUsers(self):
-        emit('connected_users',[{'email': user['email']} for user in self.connectedUsers],json = True)
+        print('\nemit\n')
+        self.emit('connected_users',[{'email': user['email']} for user in self.connectedUsers])
 
     '''
         On connect
@@ -53,8 +54,6 @@ class Chat(Namespace):
             self.connectedUsers.remove(conn)
             self.emitUsers()
 
-            print(str(self.connectedUsers))
-
     
     '''
         On custom events
@@ -65,4 +64,4 @@ class Chat(Namespace):
         
         if g.me is not None:
             conn = next( x for x in self.connectedUsers if x['email'] == email)
-            emit('get_message_from_user',(g.me.email, message,), room=conn['sid'])
+            self.emit('get_message_from_user',(g.me.email, message,), room=conn['sid'])

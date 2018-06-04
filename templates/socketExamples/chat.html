@@ -1,12 +1,17 @@
 {% extends "layouts/layout.html" %}
 {% block body %}
     <div class ="row" style="padding-top: 100px;">
-        <div class="col-12 text-center">
-            <table id='connUsers-tbl' class='table'>
-                <thead></thead>
-                <tbody></tbody>
-            </table>
+        <div class="col-3 border-left">
+            <!--
+
+                <table id='connUsers-tbl' class='table'>
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            -->
+            <div class="list-group" id="connUsers-list"></div>
         </div>
+        <div class="col-8"></div>
     </div>
 {% endblock %}
 {% block localCss %}
@@ -91,16 +96,59 @@
         table.draw();
     }
 
+    const connUsersList = [];
+
+    const refreshList = data => {
+        data.forEach( row => {
+            const index = connUsersList.findIndex( connUser => connUser.email === row.email)
+
+            if (index < 0) {
+                const connUser = {
+                    email: row.email,
+                    display: {
+                        name: toDom(['div', {'class':'mb-1 text-success'},row.email]),
+                        state: toDom(['small','Connected']),
+                    },
+
+                }
+
+                toDom(['a',{'class':'list-group-item list-group-item-action flex-column align-items-start','href':'#'},
+                    ['div',{'class':'d-flex w-100 justify-content-between'},
+                        connUser.display.name,
+                        //connUser.display.state,
+                    ]
+                ],{at:'#connUsers-list'})
+
+                console.log(connUser)
+                connUsersList.push(connUser)
+            } else {
+                const connUser = connUsersList[index];
+                connUser.display.state.innerHTML = 'Connected'
+                connUser.display.name.classList.remove('text-danger')
+                connUser.display.name.classList.add('text-succes')
+            }
+        })
+
+        connUsersList.forEach(connUser => {
+            const index = data.findIndex( row => connUser.email === row.email)
+            if (index < 0) {
+                connUser.display.state.innerHTML = 'Disconnected'
+
+                connUser.display.name.classList.add('text-danger')
+                connUser.display.name.classList.remove('text-succes')
+            }
+        })
+    }
+
     $(document).ready(function () {
         createTable()
         
         socket.on('connected_users', function (data) {
             console.log(data)
-            refreshTable(data)
+            refreshList(data)
         })
 
         socket.on('connect',function (data) {
-            console.log(data)
         })
 
         socket.on('get_message_from_user',function (email,message) {
