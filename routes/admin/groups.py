@@ -28,3 +28,76 @@ def append(bp,bp_api):
         groups = models.auth.Group.query.all()
         groups_json = [ group.serialize() for group in groups]
         return jsonify(groups_json)
+
+
+    @bp_api.route('/group', methods=('POST',))
+    @auth.login_required
+    @auth.group_required('active')
+    @auth.group_required('admin')
+    @auth.notin_group_required('blocked')
+    def api_post_group():
+            
+        name = request.form['name'] if 'name' in request.form else None
+        description = request.form['description'] if 'description' in request.form else None
+        errors = []
+
+        if request.is_json:
+            data = request.get_json()
+            name = data['name'] or name
+            description = data['description'] or description
+
+        if not name:
+            errors.append({
+                'code': 1,
+                'description': 'Name is required.',
+            })
+        else:
+            group = models.auth.Group.query.filter_by(name = name).first()
+            if group is not None:
+                errors.append({
+                    'code': 1,
+                    'description': 'Group {} is already registered.'.format(name),
+                })
+
+        if len(errors) is None:
+            group = models.auth.Group(name=name, description=description)
+            
+            models.db.session.add(group)
+            models.db.session.commit()
+
+        return jsonify(errors)
+
+
+    @bp_api.route('/group', methods=('DELETE',))
+    @auth.login_required
+    @auth.group_required('active')
+    @auth.group_required('admin')
+    @auth.notin_group_required('blocked')
+    def api_delete_group():
+            
+        id = request.form['groupId'] if 'groupId' in request.form else None
+        errors = []
+
+        if request.is_json:
+            data = request.get_json()
+            id = data['groupId'] or id
+
+        if not id:
+            errors.append({
+                'code': 1,
+                'description': 'Group id is required.',
+            })
+        else:
+            group = models.auth.Group.query.filter_by(id = id).first()
+            if group is None:
+                errors.append({
+                    'code': 1,
+                    'description': 'Group with {} does not exists.'.format(name),
+                })
+
+            elif len(errors) is None:
+                
+                models.db.session.delete(group)
+                models.db.session.commit()
+
+        return jsonify(errors)
