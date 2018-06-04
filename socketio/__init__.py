@@ -57,4 +57,8 @@ def init_app(app):
 
     @socketio.on('send message to user')
     def send_message_to_user(email,message):
-        print('>>>> '+email + ' ' + message)
+        
+        routes.auth.load_logged_in_user()
+        
+        if g.me is not None:
+            print('>>>> From '+g.me.email + ' to '+email+': ' + message)

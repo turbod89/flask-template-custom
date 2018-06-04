@@ -45,7 +45,7 @@
                 {
                     "title": "Message",
                     "data": "email",
-                },
+                }
             ],
             "columnDefs": [
                 {
@@ -54,24 +54,35 @@
                         return "";
                     },
                     "createdCell": function(td,cellData,rowData,row,col) {
-                        const input = toDom(['input',{'type':'text'},
 
+                        if (rowData.email === '{{ me.email }}') {
+                            return
+                        }
+
+                        const input = toDom(['input',{'class':'form-control','type':'text','placeholder':'Message'},
                         ])
 
                         
-                        toDom([
-                            input,
-                            ['button','Send',
+                        toDom(['div',{'class':'form-inline x-0'},
+
+                            ['div',{'class':'form-group'},
+                                input,
+                            ],
+                            ['button', {'class': 'btn btn-primary ml-2'},
+                                ['i',{'class':'fa fa-share-square'}],
                                 function $click(event) {
-                                    console.log(input.value)
-                                    socket.emit('send message to user',rowData.email,input.value)
-                                    input.value = ''
+                                    if (input.value !== '') {
+                                        console.log(input.value)
+                                        socket.emit('send message to user',rowData.email,input.value)
+                                        input.value = ''
+                                        intput.focus()
+                                    }
                                 }
                             ],
 
                         ],{at:td})
                     }
-                }
+                },
             ],
 
         });
