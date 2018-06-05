@@ -1,17 +1,20 @@
 {% extends "layouts/layout.html" %}
 {% block body %}
-    <div class ="row" style="padding-top: 100px;">
-        <div class="col-3 border-left">
-            <!--
-
-                <table id='connUsers-tbl' class='table'>
-                    <thead></thead>
-                    <tbody></tbody>
-                </table>
-            -->
-            <div class="list-group" id="connUsers-list"></div>
+    <div class ="row" style="">
+        <div class="col">
+            <div class="card" id="chat-card">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs" id="btn-panel">
+                        <li class="nav-item" id="contacts-btn">
+                            <a class="nav-link active" href="#">Contacts</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body" id="contacts-pnl">
+                    <div class="list-group" id="connUsers-list"></div>
+                </div>
+            </div>
         </div>
-        <div class="col-8"></div>
     </div>
 {% endblock %}
 {% block localCss %}
@@ -35,117 +38,253 @@
 
 <script>
 
-    const createTable = () => {
-        $('#connUsers-tbl').DataTable({
-            "data": [],
-            "columns": [
-                {
-                    "title": "Email",
-                    "data": "email",
+    /*
+        Class Appendable
+    */
+
+    const Appendable = function (domObject) {
+        const dobj = domObject
+
+        this.appendTo = target => toDom(dobj,{at:target})
+        this.detach = () => dobj.remove()
+        this.appendToggle = function(target) {
+            if (dobj.parentElement === null) {
+                this.appendTo(target)
+            } else {
+                this.detach()
+            }
+        }
+    }
+
+    /*
+        Class Connected User 
+    */
+
+    const ConnectedUser = function (data,parentSet,contactsBtn,contactsPnl) {
+
+        const connUser = this;
+
+        connUser.email = data.email
+        connUser.unreadMessages = 0
+        connUser.display = {}
+        connUser.display.newMessagesBadge = toDom(['span',{'class':'badge badge-pill badge-primary d-none',},'0'])
+        connUser.display.name = toDom(['div', {'class':'mb-1 text-success'},connUser.email])
+        connUser.display.state = toDom(['small','Connected'])
+        connUser.display.listItem = toDom(
+            ['a',{'class':'list-group-item list-group-item-action flex-column align-items-start','href':'#'},
+                ['div',{'class':'d-flex w-100 justify-content-between'},
+                    connUser.display.name,
+                    //connUser.display.state,
+                    connUser.display.newMessagesBadge,
+                ],
+                function $click(event) {
+                    connUser.panelBtn.appendTo('#btn-panel')
+                    parentSet.displayPanel(connUser.display.panel)
+                    connUser.setUnreadedMessages(0)
+                    parentSet.setActiveBtn(connUser.display.panelBtn)
                 },
-                {
-                    "title": "Message",
-                    "data": "email",
+            ])
+
+
+        const sendMessage = input => {
+            input.value = input.value.trim()
+            if (input.value !== '') {
+                connUser.addLineFrom(null,input.value)
+                socket.emit('send_message_to_user',connUser.email,input.value)
+                input.value = ''
+                input.focus()
+            }
+        }
+        
+        const input = toDom(['input',{'class':'form-control','type':'text','placeholder':'Message'},
+            function $keyup(event) {
+                
+                if (event.keyCode === 13 || event.which === 13)  {
+                    sendMessage(event.target)
                 }
-            ],
-            "columnDefs": [
-                {
-                    "targets":[1],
-                    "render": function (data,type,row,meta) {
-                        return "";
-                    },
-                    "createdCell": function(td,cellData,rowData,row,col) {
+            }
+        ])
 
-                        if (rowData.email === '{{ me.email }}') {
-                            return
-                        }
+        const chatDiv = toDom(['div',{'class':'px-2 py-2 mb-2'}])
+        connUser.display.panel = toDom([
+            'div',{'class':'card-body d-none','style': 'max-height: 640px;overflow-y: scroll;'},
+                chatDiv,
+                ['div',{'class':'px-2'},
+                    ['div',{'class':'row'},
 
-                        const input = toDom(['input',{'class':'form-control','type':'text','placeholder':'Message'},
-                        ])
-
-                        
-                        toDom(['div',{'class':'form-inline x-0'},
-
-                            ['div',{'class':'form-group'},
-                                input,
-                            ],
-                            ['button', {'class': 'btn btn-primary ml-2'},
+                        ['div',{'class':'col-12 col-md-11'},
+                            input,
+                        ],
+                        ['div',{'class': 'd-none d-md-block col-md-1'},
+                            ['button', {'class': 'btn btn-primary'},
                                 ['i',{'class':'fa fa-share-square'}],
                                 function $click(event) {
-                                    if (input.value !== '') {
-                                        console.log(input.value)
-                                        socket.emit('send_message_to_user',rowData.email,input.value)
-                                        input.value = ''
-                                        input.focus()
-                                    }
+                                    sendMessage(input)
                                 }
                             ],
+                        ],
+                    ],
+                ],
 
-                        ],{at:td})
-                    }
-                },
-            ],
+        ])
 
-        });
-    }
+        connUser.display.panelBtn = toDom(
+            ['li',{'class':'nav-item'},
+                ['a', {'class':'nav-link', 'href': '#'},
+                    ['span',connUser.email,
+                        function $click (event) {
+                            parentSet.displayPanel(connUser.display.panel)
+                            connUser.setUnreadedMessages(0)
+                            parentSet.setActiveBtn(connUser.display.panelBtn)
+                        }
+                    ],
+                    ['i',{'class':'fa fa-times ml-2'},
+                        function $click (event) {
+                            connUser.panelBtn.detach()
+                            parentSet.displayPanel(contactsPnl)
+                            parentSet.setActiveBtn(contactsBtn)
+                        }
+                    ],
+                ]
+            ]
+        )
 
-    const refreshTable = data => {
-        const table = $('#connUsers-tbl').DataTable();
-        table.clear()
-        table.rows.add(data)
-        table.draw();
-    }
-
-    const connUsersList = [];
-
-    const refreshList = data => {
-        data.forEach( row => {
-            const index = connUsersList.findIndex( connUser => connUser.email === row.email)
-
-            if (index < 0) {
-                const connUser = {
-                    email: row.email,
-                    display: {
-                        name: toDom(['div', {'class':'mb-1 text-success'},row.email]),
-                        state: toDom(['small','Connected']),
-                    },
-
-                }
-
-                toDom(['a',{'class':'list-group-item list-group-item-action flex-column align-items-start','href':'#'},
-                    ['div',{'class':'d-flex w-100 justify-content-between'},
-                        connUser.display.name,
-                        //connUser.display.state,
-                    ]
-                ],{at:'#connUsers-list'})
-
-                console.log(connUser)
-                connUsersList.push(connUser)
-            } else {
-                const connUser = connUsersList[index];
+        connUser.setState =  state => {
+            if (state.toLowerCase() === 'connected') {
                 connUser.display.state.innerHTML = 'Connected'
                 connUser.display.name.classList.remove('text-danger')
-                connUser.display.name.classList.add('text-succes')
-            }
-        })
-
-        connUsersList.forEach(connUser => {
-            const index = data.findIndex( row => connUser.email === row.email)
-            if (index < 0) {
+                connUser.display.name.classList.add('text-success')            
+            } else {
                 connUser.display.state.innerHTML = 'Disconnected'
-
                 connUser.display.name.classList.add('text-danger')
-                connUser.display.name.classList.remove('text-succes')
+                connUser.display.name.classList.remove('text-success')
             }
-        })
+        }
+
+        connUser.setUnreadedMessages = u => {
+            if (u === 'add') {
+                connUser.unreadMessages++
+                connUser.display.newMessagesBadge.innerHTML = connUser.unreadMessages
+                connUser.display.newMessagesBadge.classList.remove('d-none')
+            } else if (u === '0' || u === 0) {
+                connUser.unreadMessages = 0
+                connUser.display.newMessagesBadge.innerHTML = connUser.unreadMessages
+                connUser.display.newMessagesBadge.classList.add('d-none')
+            }
+        }
+
+
+        connUser.listItem = new Appendable(connUser.display.listItem)
+        connUser.panelBtn = new Appendable(connUser.display.panelBtn)
+        connUser.panel = new Appendable(connUser.display.panel)
+
+        connUser.addLineFrom = (email,line) => {
+            if (email === connUser.email) {
+                toDom(['p',{'class':''},line],{at:chatDiv})
+                
+                if (connUser.display.panel.classList.contains('d-none')) {
+                    connUser.setUnreadedMessages('add')
+                }
+            
+            } else {
+                toDom(['p',{'class':'text-right text-primary'},line],{at:chatDiv})
+            }
+        }
+
+
     }
 
-    $(document).ready(function () {
-        createTable()
-        
-        socket.on('connected_users', function (data) {
+
+    /*
+        Class Connected User List
+    */
+
+    const ConnectedUserList = function (myEmail,contactsBtn,contactsPnl) {
+
+        const list = this
+        const connUsersList = []
+
+        this.refresh = data => {
+
             console.log(data)
-            refreshList(data)
+            
+            
+            // users now connected
+
+            data.forEach( row => {
+                if (row.email === myEmail) {
+                    return
+                }
+
+                const index = connUsersList.findIndex( connUser => connUser.email === row.email)
+
+                if (index < 0) {
+                    const connUser = new ConnectedUser(row,this,contactsBtn,contactsPnl)
+                    connUser.listItem.appendTo('#connUsers-list')
+                    connUser.panel.appendTo('#chat-card')
+
+                    connUsersList.push(connUser)
+                } else {
+                    const connUser = connUsersList[index];
+                    connUser.setState('connected')
+                }
+            })
+
+            // users now not connected but connected before
+
+            connUsersList.forEach(connUser => {
+                const index = data.findIndex( row => connUser.email === row.email)
+                if (index < 0) {
+                    connUser.setState('disconnected')
+                }
+            })
+        }
+
+
+        this.recivedMessage = (email,message) => {
+            const index = connUsersList.findIndex( connUser => connUser.email === email)
+            if (index < 0) {
+
+            } else {
+                connUser = connUsersList[index]
+                connUser.addLineFrom(email,message)
+            }
+        }
+
+        this.displayPanel = panel => {
+            $('#chat-card .card-body').addClass('d-none')
+            $(panel).removeClass('d-none')
+        }
+
+        this.setActiveBtn = btn => {
+            $('#btn-panel .nav-link').removeClass('active')
+            $(btn).find('.nav-link').addClass('active')
+        }
+
+        //
+        // constructor
+        //
+
+        
+        $(contactsBtn).click(function () {
+            list.displayPanel(contactsPnl)
+            list.setActiveBtn(contactsBtn)
+        })
+
+
+    }
+
+    /*
+        On ready
+    */
+
+    $(document).ready(function () {
+        const myEmail = '{{ g.me.email }}'
+
+        const list = new ConnectedUserList(myEmail,'#contacts-btn','#contacts-pnl')
+
+        socket.on('connected_users', function (data) {
+            list.refresh(data)
         })
 
         socket.on('connect',function (data) {
@@ -153,7 +292,10 @@
 
         socket.on('get_message_from_user',function (email,message) {
             console.log('From '+email+':',message)
+            list.recivedMessage(email,message)
         })
     })
+
+
 </script>
 {% endblock %}
