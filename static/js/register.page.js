@@ -327,16 +327,37 @@ $(document).ready(function (event) {
                     data: JSON.stringify({image: resizedImageData}),
                     success: function (data) {
                         console.log(data);
+                        sendImageData()
                     },
                     error: function (data) {
                         console.error(data)
+                        window.location.replace('/')
                     }
                 });
             }
 
             // 3
             const imageData = canvas.toDataURL()
-            console.log(imageData)
+            sendImageData = () => {
+                $.ajax({
+                    url: "/api/profile/avatar",
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: "application/json; charset=utf-8",
+                    async: true,
+                    data: JSON.stringify({
+                        image: imageData
+                    }),
+                    success: function (data) {
+                        console.log(data);
+                        window.location.replace('/')
+                    },
+                    error: function (data) {
+                        console.error(data)
+                        window.location.replace('/')
+                    }
+                });
+            }
         }
 
         $.ajax({
@@ -350,7 +371,11 @@ $(document).ready(function (event) {
                 console.log(data);
                 if (data.errors && data.errors.length === 0) {
                     // success
-                    sendResizedImageData()
+                    if (havePhoto) {
+                        sendResizedImageData()
+                    } else {
+                        window.location.replace('/')
+                    }
                 } else {
                     // fail
                 }

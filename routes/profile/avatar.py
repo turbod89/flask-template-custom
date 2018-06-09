@@ -4,14 +4,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from ... import models
 from .. import auth
 
-import re
-import os
-import math
-import base64
-from io import BytesIO
-from PIL import Image
-import time
-
+import math, time
 
 def append(bp,bp_api):
 
@@ -46,30 +39,21 @@ def append(bp,bp_api):
         if data['image'] is None:
             return jsonify({'errors': [{'description': '\'image\' field not provided'}]})
 
-        r = re.compile('data:(.+);base64,')
-        match = re.search(r,data['image'])
-        file_mime = match.group(1)
+        filename = 'avatar_'+str(g.me.id)+'_'+str(math.floor(1000*time.time()))
+        file_descriptor, file_mime = models.main.Image.save_from_urlData( data['image'],filename)
 
-        directory = os.path.join(current_app.root_path, 'data/avatars')
-        try:
-            os.stat(directory)
-        except:
-            os.mkdir(directory)
-        file_descriptor = os.path.join(directory,'/avatar_'+str(g.me.id)+'_'+str(math.floor(1000*time.time())))
+        print ('%s %s' % (file_descriptor, file_mime,))
 
-        if file_mime == 'image/png':
-            file_descriptor += '.png'
-        elif file_mime == 'image/jpg':
-            file_descriptor += '.jpg'
-        
+        avatar = models.profile.Avatar(
+            file_descriptor = file_descriptor,
+            file_mime = file_mime,
+            profile = g.me.profile
+        )
 
-        image_data = bytes(re.sub(r,'',data['image']), encoding='ascii')
-        
-        image = Image.open(BytesIO(base64.b64decode(image_data)))
-        image.save(file_descriptor)
+        print(avatar)
 
-        avatar = models.profile.Avatar(file_descriptor = file_descriptor, file_mime = file_mime, profile = g.me.profile)
         models.db.session.add(avatar)
+        models.db.session.commit()
 
         return jsonify({'errors':[]})
         

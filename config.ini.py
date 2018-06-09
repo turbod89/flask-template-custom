@@ -79,5 +79,7 @@ class Configuration():
         self.FLASK_RUN_CERT = 'certs/dev.crt'
         self.FLASK_RUN_KEY = 'certs/dev.key'
         self.HTTPS_REQUIRED = False
+
+        self.UPLOADED_FILES_DEST = '/var/uploads'
         
         self.CONFIGURATION_NAME = config
