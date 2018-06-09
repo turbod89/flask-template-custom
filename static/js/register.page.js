@@ -302,8 +302,6 @@ $(document).ready(function (event) {
         const fp = new FormParser(signUpFormMetadata)
         fp.parse().validate(onValidationError)
 
-        console.log(fp.data)
-
         if (havePhoto) {
             // 2
             const smallSize = 64
@@ -322,6 +320,27 @@ $(document).ready(function (event) {
             const imageData = canvas.toDataURL()
             console.log(imageData)
         }
+
+        $.ajax({
+            url: "/api/auth/register",
+            type: 'POST',
+            dataType: 'json',
+            contentType: "application/json; charset=utf-8",
+            async: true,
+            data: JSON.stringify(fp.data),
+            success: function (data) {
+                console.log(data);
+                if (data.errors && data.errors.length === 0) {
+                    // success
+                    window.location.replace('/')
+                } else {
+                    // fail
+                }
+            },
+            error: function (data) {
+                console.error(data)
+            }
+        });
 
     })
 
