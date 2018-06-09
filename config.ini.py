@@ -75,5 +75,9 @@ class Configuration():
         
         self.EXPLAIN_TEMPLATE_LOADING = False
         #self.TEMPLATES_AUTO_RELOAD = None
+
+        self.FLASK_RUN_CERT = 'certs/dev.crt'
+        self.FLASK_RUN_KEY = 'certs/dev.key'
+        self.HTTPS_REQUIRED = False
         
         self.CONFIGURATION_NAME = config
