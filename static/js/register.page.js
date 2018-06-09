@@ -302,6 +302,9 @@ $(document).ready(function (event) {
         const fp = new FormParser(signUpFormMetadata)
         fp.parse().validate(onValidationError)
 
+        let sendResizedImageData = () => {}
+        let sendImageData = () => {}
+
         if (havePhoto) {
             // 2
             const smallSize = 64
@@ -314,7 +317,22 @@ $(document).ready(function (event) {
             resizedContext.drawImage(canvas, (canvas.width - minDimension) / 2, (canvas.height - minDimension) / 2, minDimension, minDimension, 0, 0, resizedCanvas.width, resizedCanvas.height)
             const resizedImageData = resizedCanvas.toDataURL()
 
-            console.log(resizedImageData)
+            sendResizedImageData = () => {
+                $.ajax({
+                    url: "/api/profile/avatar",
+                    type: 'POST',
+                    dataType: 'json',
+                    contentType: "application/json; charset=utf-8",
+                    async: true,
+                    data: JSON.stringify({image: resizedImageData}),
+                    success: function (data) {
+                        console.log(data);
+                    },
+                    error: function (data) {
+                        console.error(data)
+                    }
+                });
+            }
 
             // 3
             const imageData = canvas.toDataURL()
@@ -332,7 +350,7 @@ $(document).ready(function (event) {
                 console.log(data);
                 if (data.errors && data.errors.length === 0) {
                     // success
-                    window.location.replace('/')
+                    sendResizedImageData()
                 } else {
                     // fail
                 }

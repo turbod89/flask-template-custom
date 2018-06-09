@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, g
 
 from .config import Configuration
 from . import models, routes, socketio

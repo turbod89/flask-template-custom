@@ -2,6 +2,7 @@ from ..Base import Base
 
 from .User import User
 from .Group import Group
+from ..profile import Profile
 
 
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -77,10 +78,12 @@ def generate(db):
         
     for tUser in users:
           user = User(
-              first_name = tUser['first_name'],
-              last_name = tUser['last_name'],
               email = tUser['email'],
               password = generate_password_hash(tUser['password']),
+          )
+          user.profile = Profile(
+              first_name=tUser['first_name'],
+              last_name=tUser['last_name'],
           )
           db.session.add(user)
     

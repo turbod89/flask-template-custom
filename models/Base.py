@@ -12,6 +12,6 @@ class Base(db.Model):
         return {
             'id': self.id,
             'deleted': self.deleted,
-            'date_add': self.date_add.isoformat(),
-            'date_upd': self.date_upd.isoformat(),
+            'date_add': None if self.date_add is None else self.date_add.isoformat(),
+            'date_upd': None if self.date_upd is None else self.date_upd.isoformat(),
         }
