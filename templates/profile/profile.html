@@ -1,0 +1,34 @@
+{% extends "layouts/layout.html" %}
+{% block body %}
+    <div class="py-5" style="max-width: 420px; margin: auto;">
+        <div class ="text-center">
+            <img class="img-thumbnail" id='profile-img' src="" alt="Card image cap" style="max-width: 256px;">
+        </div>
+        <div  class ="py-5 text-center">
+            <h4 id="complete-name">First Name + Last Name</h4>
+        </div>
+    </div>
+{% endblock %}
+{% block localJs %}
+<script>
+    $(document).ready(function (event) {
+        
+        $.ajax({
+            url: "/api/profile/{{user.id}}",
+            type: 'GET',
+            contentType: "application/json; charset=utf-8",
+            async: true,
+            success: function (data) {
+                console.log(data);
+                document.getElementById('profile-img').src = data.profile.avatar
+                document.getElementById('complete-name').innerHTML = data.profile.first_name + ' ' + data.profile.last_name
+
+                
+            },
+            error: function (data) {
+                console.error(data)
+            }
+        });            
+    })
+</script>
+{% endblock %}

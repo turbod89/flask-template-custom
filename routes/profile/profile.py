@@ -25,4 +25,19 @@ def append(bp,bp_api):
     def api_own_profile():
         return redirect(url_for('api/profile.api_profile', user_id=g.me.id))
 
+    @bp.route('/<int:user_id>', methods=('GET',))
+    @auth.login_required
+    @auth.group_required('active')
+    @auth.notin_group_required('blocked')
+    def profile(user_id):
+        user = models.auth.User.query.filter_by(id = user_id).first_or_404()
+        return render_template('profile/profile.html', me = g.me, user = user)
+
+    @bp.route('/', methods=('GET',))
+    @auth.login_required
+    @auth.group_required('active')
+    @auth.notin_group_required('blocked')
+    def own_profile():
+        return redirect(url_for('profile.profile', user_id=g.me.id))
+
 
