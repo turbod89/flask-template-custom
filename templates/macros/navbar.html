@@ -26,16 +26,18 @@
                 <li class="nav-item">
                     <a href="{{ url_for('main.index') }}" class ="nav-link">Home</a>
                 </li>
-                {% if g.me.profile %}
-                    <li class="nav-item">
-                        <a href="{{ url_for('profile.own_profile',) }}" class ="nav-link">My profile</a>
-                    </li>
-                {% endif %}
+                {% if not g.me.belongsTo('register') %}
+                    {% if g.me.profile %}
+                        <li class="nav-item">
+                            <a href="{{ url_for('profile.own_profile',) }}" class ="nav-link">My profile</a>
+                        </li>
+                    {% endif %}
                     {% if g.me.belongsTo('admin')%}
                         <li class="nav-item">
                             <a href="{{ url_for('admin.main') }}" class = "nav-link">Administration</a>
                         </li>        
                     {% endif %}
+                {% endif %}
                 <li class="nav-item">
                     <a href="{{ url_for('auth.logout') }}" class = "nav-link">Log out</a>
                 </li>
