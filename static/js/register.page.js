@@ -181,7 +181,9 @@ $(document).ready(function (event) {
 
         const startStream = constraints => navigator.mediaDevices.getUserMedia(constraints)
             .then(mediaStream => {
-                video.src = window.URL.createObjectURL(mediaStream)
+                // Deprecated
+                // video.src = window.URL.createObjectURL(mediaStream)
+                video.srcObject = mediaStream
                 return mediaStream
             })
 
