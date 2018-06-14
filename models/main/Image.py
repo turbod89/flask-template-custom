@@ -33,7 +33,7 @@ class Image(Base):
         return obj
 
     @staticmethod
-    def save_from_urlData(data, filename = None):
+    def save_from_urlData(data, filename = None, max_width = None, max_height = None):
         r = re.compile('data:(.+);base64,')
         match = re.search(r, data)
         file_mime = match.group(1)
@@ -58,6 +58,47 @@ class Image(Base):
         image_data = bytes(re.sub(r, '', data), encoding='ascii')
 
         image = PIL_Image.open(BytesIO(base64.b64decode(image_data)))
-        image.save(file_descriptor)
+
+        #
+        #   convent to jpg
+        #
+
+        if file_mime == 'image/png':
+            #re-convert to jpeg
+            image = image.convert('RGB')
+            file_descriptor = re.sub(r'\.png$', '.jpg', file_descriptor)
+            file_mime = 'image/jpg'
+        
+        
+        width, height = image.size
+
+        
+        if max_width is not None and width > max_width:
+            if file_mime == 'image/png':
+                #re-convert to jpeg
+                image = image.convert('RGB')
+                file_descriptor = re.sub(r'\.png$','.jpg',file_descriptor)
+                file_mime = 'image/jpg'
+
+            height = math.floor(height*max_width/width)
+            width = max_width
+            image = image.resize((width, height), PIL_Image.ANTIALIAS)
+
+        if max_height is not None and height > max_height:
+            if file_mime == 'image/png':
+                #re-convert to jpeg
+                image = image.convert('RGB')
+                file_descriptor = re.sub(r'\.png$', '.jpg', file_descriptor)
+                file_mime = 'image/jpg'
+
+            width = math.floor(width*max_height/height)
+            height = height
+            image = image.resize((width, height), PIL_Image.ANTIALIAS)
+
+
+        if file_mime == 'image/png':
+            image.save(file_descriptor)
+        elif file_mime == 'image/jpg':
+            image.save(file_descriptor, optimize=True, quality=95)
 
         return file_descriptor, file_mime

@@ -3,13 +3,7 @@ $(document).ready(function (event) {
     /**
     *   Presets
     */
-    const profileImg = new Image()
-    profileImg.onload = () => {
-        canvas.height = profileImg.height
-        canvas.width = profileImg.width
-        context.drawImage(profileImg, 0, 0)
-    }
-
+   
     const video = document.querySelector('video')
     const canvas = document.querySelector('#selfie-card canvas.card-img-top')
     const context = canvas.getContext('2d')
@@ -17,7 +11,16 @@ $(document).ready(function (event) {
     const reTakeSelfieBtn = document.getElementById('reTakeSelfie-btn')
     const removeSelfieBtn = document.getElementById('removeSelfie-btn')
     const updateSelfieBtn = document.getElementById('updateSelfie-btn')
+    const profileImgElement = document.getElementById('profile-img')
     const uploadPhotoBtn = document.getElementById('uploadPhoto-btn')
+
+    const profileImg = new Image()
+    profileImg.onload = () => {
+        canvas.height = profileImg.height
+        canvas.width = profileImg.width
+        context.drawImage(profileImg, 0, 0, profileImg.width, profileImg.height,0,0,canvas.width, canvas.height )
+    }
+
     const createSelfieInput = () => {
         const selfieInput = document.createElement('input')
         selfieInput.setAttribute('type', 'file')
@@ -66,6 +69,7 @@ $(document).ready(function (event) {
                 stopTracks(currentStream)
                 video.classList.add('d-none')
                 canvas.classList.remove('d-none')
+                profileImgElement.classList.add('d-none')
                 takeSelfieBtn.parentNode.classList.add('d-none')
                 reTakeSelfieBtn.parentNode.classList.remove('d-none')
                 updateSelfieBtn.parentNode.classList.remove('d-none')
@@ -146,6 +150,7 @@ $(document).ready(function (event) {
                     if (currentStream === null) {
                         video.classList.remove('d-none')
                         canvas.classList.add('d-none')
+                        profileImgElement.classList.add('d-none')
                         startStream(constraints).then(stream => currentStream = stream)
                     } else {
                         havePhoto = true
@@ -157,6 +162,7 @@ $(document).ready(function (event) {
 
                         video.classList.add('d-none')
                         canvas.classList.remove('d-none')
+                        profileImgElement.classList.add('d-none')
 
                         takeSelfieBtn.parentNode.classList.add('d-none')
                         reTakeSelfieBtn.parentNode.classList.remove('d-none')
@@ -171,6 +177,7 @@ $(document).ready(function (event) {
 
                     video.classList.remove('d-none')
                     canvas.classList.add('d-none')
+                    profileImgElement.classList.add('d-none')
 
                     takeSelfieBtn.parentNode.classList.remove('d-none')
                     reTakeSelfieBtn.parentNode.classList.add('d-none')
@@ -183,8 +190,8 @@ $(document).ready(function (event) {
                     havePhoto = false
 
                     video.classList.add('d-none')
-                    canvas.classList.remove('d-none')
-                    profileImg.onload()
+                    canvas.classList.add('d-none')
+                    profileImgElement.classList.remove('d-none')
 
                     takeSelfieBtn.parentNode.classList.remove('d-none')
                     reTakeSelfieBtn.parentNode.classList.add('d-none')
@@ -258,31 +265,6 @@ $(document).ready(function (event) {
             sendResizedImageData()
         }
 
-        $.ajax({
-            url: "/api/auth/register",
-            type: 'POST',
-            dataType: 'json',
-            contentType: "application/json; charset=utf-8",
-            async: true,
-            data: JSON.stringify(fp.data),
-            success: function (data) {
-                console.log(data);
-                if (data.errors && data.errors.length === 0) {
-                    // success
-                    if (havePhoto) {
-                        sendResizedImageData()
-                    } else {
-                        window.location.replace('/')
-                    }
-                } else {
-                    // fail
-                }
-            },
-            error: function (data) {
-                console.error(data)
-            }
-        });
-
     })
 
 
@@ -298,7 +280,7 @@ $(document).ready(function (event) {
         success: function (data) {
             console.log(data);
 
-            profileImg.src = data.profile.avatar
+            profileImgElement.src = data.profile.avatar
             document.getElementById('complete-name').innerHTML = data.profile.first_name + ' ' + data.profile.last_name
         },
         error: function (data) {

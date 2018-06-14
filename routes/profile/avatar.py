@@ -4,7 +4,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from ... import models
 from .. import auth
 
-import math, time
+import math, time, hashlib
+from PIL import Image as PIL_Image
 
 def append(bp,bp_api):
 
@@ -25,7 +26,16 @@ def append(bp,bp_api):
     @auth.group_required('active')
     @auth.notin_group_required('blocked')
     def own_avatar():
-        return redirect(url_for('profile.avatar',user_id=g.me.id))
+        return avatar(user_id=g.me.id)
+    
+    @bp.route('/avatar/<string:token>', methods=('GET',))
+    @auth.login_required
+    @auth.group_required('active')
+    @auth.notin_group_required('blocked')
+    def own_avatar_token(token):
+        #
+        # do something with the token
+        return avatar(user_id = g.me.id)
 
 
     @bp_api.route('/avatar', methods=('POST',))
@@ -40,13 +50,25 @@ def append(bp,bp_api):
             return jsonify({'errors': [{'description': '\'image\' field not provided'}]})
 
         filename = 'avatar_'+str(g.me.id)+'_'+str(math.floor(1000*time.time()))
-        file_descriptor, file_mime = models.main.Image.save_from_urlData( data['image'],filename)
+        m = hashlib.md5()
+        m.update(str(math.floor(1000*time.time())).encode('utf-8'))
+        token = m.hexdigest()
+        file_descriptor, file_mime = models.main.Image.save_from_urlData( data['image'],filename, max_width=512,max_height=512)
 
-        print ('%s %s' % (file_descriptor, file_mime,))
+        img = PIL_Image.open(file_descriptor)
+        w,h = img.size
+
+        print ('%s %s has width = %i and height = %i' % (file_descriptor, file_mime,w,h,))
+
+        # if exists, replace previous avatar
+        oldAvatar = g.me.profile.avatar
+        if oldAvatar is not None:
+            oldAvatar.profile = None
 
         avatar = models.profile.Avatar(
             file_descriptor = file_descriptor,
             file_mime = file_mime,
+            token = token,
             profile = g.me.profile
         )
 
