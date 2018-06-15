@@ -52,7 +52,7 @@ class Image(Base):
 
         if file_mime == 'image/png':
             file_descriptor += '.png'
-        elif file_mime == 'image/jpg':
+        elif file_mime == 'image/jpg' or file_mime == 'image/jpeg':
             file_descriptor += '.jpg'
 
         image_data = bytes(re.sub(r, '', data), encoding='ascii')
@@ -67,7 +67,7 @@ class Image(Base):
             #re-convert to jpeg
             image = image.convert('RGB')
             file_descriptor = re.sub(r'\.png$', '.jpg', file_descriptor)
-            file_mime = 'image/jpg'
+            file_mime = 'image/jpeg'
         
         
         width, height = image.size
@@ -78,7 +78,7 @@ class Image(Base):
                 #re-convert to jpeg
                 image = image.convert('RGB')
                 file_descriptor = re.sub(r'\.png$','.jpg',file_descriptor)
-                file_mime = 'image/jpg'
+                file_mime = 'image/jpeg'
 
             height = math.floor(height*max_width/width)
             width = max_width
@@ -89,7 +89,7 @@ class Image(Base):
                 #re-convert to jpeg
                 image = image.convert('RGB')
                 file_descriptor = re.sub(r'\.png$', '.jpg', file_descriptor)
-                file_mime = 'image/jpg'
+                file_mime = 'image/jpeg'
 
             width = math.floor(width*max_height/height)
             height = height
@@ -98,7 +98,9 @@ class Image(Base):
 
         if file_mime == 'image/png':
             image.save(file_descriptor)
-        elif file_mime == 'image/jpg':
+        elif file_mime == 'image/jpg' or file_mime == 'image/jpeg':
             image.save(file_descriptor, optimize=True, quality=95)
+        else:
+            print('File mimetype = %s unknown' % (file_mime,))
 
         return file_descriptor, file_mime

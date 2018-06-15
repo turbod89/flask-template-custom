@@ -17,8 +17,10 @@ def load_logged_in_user():
 
     if user_id is None:
         g.me = None
+        session['logged_in'] = False
     else:
         g.me = models.auth.User.query.filter_by(id = user_id).first()
+        session['logged_in'] = g.me is not None
         #g.gravatar = Gravatar(g.me.email)
 
 def login_required(view):

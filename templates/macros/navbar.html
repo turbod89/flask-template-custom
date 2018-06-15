@@ -22,7 +22,7 @@
                 <li class="nav-item">
                     <a href="{{ url_for('auth.register') }}" class ="nav-link">Sign up</a>
                 </li>
-                {% else %}
+            {% else %}
                 <li class="nav-item">
                     <a href="{{ url_for('main.index') }}" class ="nav-link">Home</a>
                 </li>
@@ -32,7 +32,7 @@
                             <a href="{{ url_for('profile.own_profile',) }}" class ="nav-link">My profile</a>
                         </li>
                     {% endif %}
-                    {% if g.me.belongsTo('admin')%}
+                    {% if g.me.belongsTo('admin') %}
                         <li class="nav-item">
                             <a href="{{ url_for('admin.main') }}" class = "nav-link">Administration</a>
                         </li>        
