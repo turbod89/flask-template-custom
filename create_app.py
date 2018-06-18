@@ -2,7 +2,7 @@ import os
 from flask import Flask, g
 
 from .config import Configuration
-from . import models, routes, socketio
+from . import models, routes, socketio, commands
 
 from flask_sslify import SSLify
 
@@ -24,5 +24,6 @@ def create_app(config_name):
     models.init_app(app)
     routes.init_app(app)
     socketio.init_app(app)
+    commands.init_app(app)
 
     return app
