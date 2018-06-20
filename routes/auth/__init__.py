@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from .. import models
 
-from . import register,login,logout,setInGroup
+from . import register,login,logout, activateAccount, setInGroup
 
 #from libgravatar import Gravatar
 
@@ -64,4 +64,5 @@ def notin_group_required(groupName):
 register.append(bp,bp_api)
 login.append(bp,bp_api)
 logout.append(bp,bp_api)
+activateAccount.append(bp,bp_api)
 setInGroup.append(bp,bp_api)
