@@ -47,7 +47,7 @@ def append(bp,bp_api):
             session['user_id'] = user.id
             session['logged_in'] = True
 
-            sendActivationEmail(user)
+            #sendActivationEmail(user)
 
         return error
 
