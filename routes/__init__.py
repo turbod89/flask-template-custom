@@ -30,8 +30,8 @@ def init_app(app):
     app.register_blueprint(admin.bp_api)
     app.register_blueprint(profile.bp)
     app.register_blueprint(profile.bp_api)
-    #app.register_blueprint(socketExamples.bp)
-    #app.register_blueprint(socketExamples.bp_api)
+    app.register_blueprint(socketExamples.bp)
+    app.register_blueprint(socketExamples.bp_api)
 
     '''
         Error handlers

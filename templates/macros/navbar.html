@@ -26,6 +26,9 @@
                 <li class="nav-item">
                     <a href="{{ url_for('main.index') }}" class ="nav-link">Home</a>
                 </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('sockets.chat') }}" class ="nav-link">Chat</a>
+                </li>
                 {% if not g.me.belongsTo('register') %}
                     {% if g.me.profile %}
                         <li class="nav-item">
